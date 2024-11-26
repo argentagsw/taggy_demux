@@ -6,43 +6,70 @@ Demultiplexing refers to the process of identifying the barcode(s) that each seq
 
 + **Customer-facing pipeline**. For users who are unwilling or unable to disclose sequencing data (e.g. due to regulatory requirements), we also provide a simplified standalone version of our software which can be run directly by users.
 
-Both pipeline versions are briefly described below. For the customer-facing pipeline, example commands are also provided. In either case, the main output of the pipeline is a set of demultiplexed, trimmed reads, which can be fed to a downstream analysis pipeline (e.g. the [FLAMES-based downstream analysis pipeline](#FLAMES-based-downstream-analysis-pipeline).
+Both pipeline versions are briefly described below. For the customer-facing pipeline, example commands are also provided. In either case, the main output of the pipeline is a set of demultiplexed, trimmed reads, which can be fed to a downstream analysis pipeline (e.g. the [FLAMES-based downstream analysis pipeline](#FLAMES-based-downstream-analysis-pipeline)). Downstream analysis is covered here only briefly, but users are encouraged to see the documentation for their tool of choice for further details.
 
-## In-house single-cell pipeline
+## In-house demultiplexing pipeline
 
-![In-house single-cell pipeline overview](img/in-house.png)
+As mentioned above, this pipeline is not customer-facing, so no commands are given below, but an overall description of the process is given to aid the user in understanding the data analysis performed by the ArgenTag team and make sense of the provided output files.
+
+![In-house demultiplexing pipeline overview](img/in-house.png)
 ### bam2fastq
 
-Takes FASTQ Reads from the ONT Dorado basecaller in HAC/SUP modes or the PacBio Kinnex Skera output.
+Takes fastq reads from the ONT Dorado basecaller in HAC/SUP modes or the PacBio Kinnex Skera output.
 For basecallers which produce bam output, conversion to fastq is required. This can be readily achieved with gnutils, samtools and/or dedicated tools.
 
 ### darwin.sh
 
-Screens the barcoding architecture of FASTQ reads.
+Screens the barcoding architecture of fastq reads.
 Samples reads and clusters them into "species" based on shared barcode and adapter patterns.
 Generates a report of "species" of reads for visual inspection of library artifacts, including chimeric reads.
 
 ### split.sh
 
-If chimeric reads are detected, split.sh can be optionally run to split them and generates dechmierized raw read files, suitable for demultiplexing.
-The darwin tool can optionally be ran again and a second report generated to check for successfull chimera splitting (dechmierization).
+If chimeric reads are detected, split.sh can be optionally run to split them and generate dechmierized raw read files, suitable for demultiplexing.
+The darwin tool can optionally be run again and a second report generated to check for successfull chimera splitting (dechmierization).
 
 ### demux.sh
 
 This is the core demultiplexing tool.
 * Uses a one-shot mathematical decoding algorithm to detect and identify BC triplets in individual reads.
-* Operates autonomously without requiring complementary short reads.
+* Operates autonomously, without requiring complementary short reads.
 * Scales efficiently with respect to the number of BC triplets, avoiding exhaustive alignment to external whitelists.
 * Generates a matrix of barcode calls with their corresponding confidences (.dat).
 * Further details on ArgenTag barcoding tech are available [here](https://pubmed.ncbi.nlm.nih.gov/27259539/).
 
 ### post\_demux.sh
 
-Takes the barcode calls and confidences and applies sanity checks and filtering criteria to filter out dubious barcode calls, untagged molecules, adapters and other unwanted reads. Generates FASTQ files with confident associations of transcript reads to BC triplets in FASTQ headers ready for cell calling
+Takes the matrix of barcode calls and confidences and applies sanity checks and filtering criteria to remove dubious barcode calls, untagged molecules, unligated adapters and other unwanted reads. Generates fastq files with confident associations of transcript reads to BC triplets, ready for cell calling
 
-## Customer-facing single-cell pipeline
+## Customer-facing demultiplexing pipeline
 
-![Customer-facing single-cell pipeline](img/customer-facing.png)
+![Customer-facing demultiplexing pipeline](img/customer-facing.png)
+
+For the customer-facing pipeline, the entire pipeline is consolidated into a single binary to make it more user friendly. The 
+
+### Output formats
+
+### FLAMES-style fastq format (--out-fmt=flames, default)
+This is a standard fastq file, except that read headers follow the following format:
+
+@XXXX-YYYY-ZZZZ\_UUUUUUUUUUUU#READID
+
+* XXXX, YYYY and ZZZZ are the 3 barcodes which identify a specific cell
+* UUUUUUUUUUUU is the 12-nt UMI
+* READID is the original read ID.
+
+An example could be
+ 
+@0076-0048-0089\_ATACCGGCTACA#VH00444:319:AAFV5MHM5:1:1101:18421:23605
+
+which would correspond to sequencing read VH00444:319:AAFV5MHM5:1:1101:18421:23605, which has been tagged with the barcode triplet (0076, 0048, 0089) and the UMI ATACCGGCTACA.
+
+### PB-style sam format (--out-fmt=sam)
+
+
+### PB-style bam format (--out-fmt=bam)
+This is the binary equivalent of the above [PB-style sam format](#PB-style-sam-format---out-fmt=sam), and should be equivalent to using --out-fmt=sam followed by sam-to-bam conversion with a third-party tool.
 
 # Downstream analysis
 
@@ -53,7 +80,7 @@ Takes the barcode calls and confidences and applies sanity checks and filtering 
 ### FLAMES Counter
 
 Performs gene and transcript quantification at the cell level
-Generates gene and transcript count matrices from minimap2 alignment of FASTQ cell files to a genome reference and its GFF3 annotation file
+Generates gene and transcript count matrices from minimap2 alignment of fastq cell files to a genome reference and its GFF3 annotation file
 Produces gene and GFF3 isoform annotation files
 This module reuses parts of [FLAMES](https://github.com/mritchielab/FLAMES/) version 1.9.0, date 2023-10-02, for transcript quantification and isoform annotation.
 
