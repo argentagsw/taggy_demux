@@ -46,9 +46,25 @@ Takes the matrix of barcode calls and confidences and applies sanity checks and 
 
 ![Customer-facing demultiplexing pipeline](img/customer-facing.png)
 
-For the customer-facing pipeline, the entire pipeline is consolidated into a single binary to make it more user friendly. The 
+For the customer-facing pipeline, the entire pipeline is consolidated into a single binary to make it more user friendly. The input is a file of basecalled reads in bam format, while the output is a set of demultiplexed, trimmed reads in one of the [supported formats](#output-formats).
 
 ### Usage
+
+    i) INPUT_PATH_OR_FILE
+    o) OUTPUT_DIR
+    s) SAMPLE_SIZE 
+    n) CONFIDENCE_THRESH
+    m) MIN_LENGTH
+    M) MAX_LENGTH
+    c) EXP_CODE
+    t) NUM_THREADS
+    E) MAX_EDIT_DIST
+    d) DEBUG_MODE
+    p) PRESERVE_TMP
+
+#### Example command
+
+    taggy_demux -i basecalled.bam -o out -m 150 -t $(( $(nproc) - 2 ))
 
 ### Output formats
 
@@ -58,7 +74,7 @@ This is a standard fastq file, except that read headers follow the following for
     @XXXX-YYYY-ZZZZ_UUUUUUUUUUUU#READID
 
 * `XXXX`, `YYYY` and `ZZZZ` are the 3 barcodes which identify a specific cell
-* `UUUUUUUUUUUU` is the 12-nt UMI
+* `UUUUUUUUUUUU` is the 12-nt UMI.
 * `READID` is the original read ID.
 
 An example could be
@@ -68,19 +84,18 @@ An example could be
 which would correspond to sequencing read VH00444:319:AAFV5MHM5:1:1101:18421:23605, which has been tagged with the barcode triplet (0076, 0048, 0089) and the UMI "ATACCGGCTACA".
 
 #### PB-style sam format (`--out-fmt=sam`)
-
+TBD.
 
 #### PB-style bam format (`--out-fmt=bam`)
 This is the binary equivalent of the above [PB-style sam format](#pb-style-sam-format---out-fmtsam), and should be equivalent to using `--out-fmt=sam` followed by sam-to-bam conversion with a third-party tool.
 
-#### scNanoGPS-style fastq format (`--out-fmt=scnano`, default)
+#### scNanoGPS-style fastq format (`--out-fmt=scnano`)
 This is a standard fastq file, except that read headers follow the following format:
 
     @READID_UUUUUUUUUUUU
-    printf("%s_%s\n%s\n+%s_%s\n%s\n",id,UMI,sequence,substr(id,2),UMI,quality)
 
 * `READID` is the original read ID.
-* `UUUUUUUUUUUU` is the 12-nt UMI
+* `UUUUUUUUUUUU` is the 12-nt UMI.
 
 An example could be
  
