@@ -1,12 +1,19 @@
-# ArgenTAG single-cell software pipelines
+# ArgenTag single-cell read demultiplexing pipelines
 
+Demultiplexing refers to the process of identifying the barcode(s) that each sequencing read from sequencing experiment is tagged with. Reads with common barcodes are assigned to the same cell. Currently, there are two alternatives for demultiplexing single-cell data generated on the ArgenTag platform:
+
+* **In-house single-cell pipeline**. This is the main processing pipeline used internally by the ArgenTag team to process internally and externally generated data. Typically, users upload their data to ArgenTag's AWS servers, where it is processed by our team to generate demultiplexed read files along with reports and supplementary files.
+
++ **Customer-facing pipeline**. For users who are unwilling or unable to disclose sequencing data (e.g. due to regulatory requirements), we also provide a simplified standalone version of our software which can be run directly by users.
+
+Both pipeline versions are briefly described below. For the customer-facing pipeline, example commands are also provided. In either case, the main output of the pipeline is a set of demultiplexed, trimmed reads, which can be fed to a downstream analysis pipeline (e.g. the [FLAMES-based downstream analysis pipeline](#FLAMES-based-downstream-analysis-pipeline).
 
 ## In-house single-cell pipeline
 
 ![In-house single-cell pipeline overview](img/in-house.png)
 ### bam2fastq
 
-Takes FASTQ Reads from the ONT Dorado basecaller in HAC/SUP modes or the PacBio Kinnex Skera output
+Takes FASTQ Reads from the ONT Dorado basecaller in HAC/SUP modes or the PacBio Kinnex Skera output.
 For basecallers which produce bam output, conversion to fastq is required. This can be readily achieved with gnutils, samtools and/or dedicated tools.
 
 ### darwin.sh
@@ -27,7 +34,7 @@ This is the core demultiplexing tool.
 * Operates autonomously without requiring complementary short reads.
 * Scales efficiently with respect to the number of BC triplets, avoiding exhaustive alignment to external whitelists.
 * Generates a matrix of barcode calls with their corresponding confidences (.dat).
-* Furth.er details on ArgenTAG barcoding tech are available [here](https://pubmed.ncbi.nlm.nih.gov/27259539/).
+* Further details on ArgenTag barcoding tech are available [here](https://pubmed.ncbi.nlm.nih.gov/27259539/).
 
 ### post\_demux.sh
 
@@ -42,6 +49,8 @@ Takes the barcode calls and confidences and applies sanity checks and filtering 
 ## FLAMES-based downstream analysis pipeline
 
 ![FLAMES-based downstream analysis pipeline overview](img/FLAMES-based.png)
+
+### FLAMES Counter
 
 Performs gene and transcript quantification at the cell level
 Generates gene and transcript count matrices from minimap2 alignment of FASTQ cell files to a genome reference and its GFF3 annotation file
@@ -76,7 +85,7 @@ Implements major components for QC, analysis, and exploration of single-cell RNA
 
 For detailed methodologies, please refer to the respective documentation for [Seurat](https://satijalab.org/seurat/articles/get_started_v5_new).
 
-### SQANTI3 5.2.1
+### SQANTI3
 
 Third-party tool, included for reference/completeness. Reference version is v.5.2.1.
 Input: Raw Isoform GFF3 annotation file  
