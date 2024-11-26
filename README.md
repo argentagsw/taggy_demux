@@ -50,14 +50,14 @@ For the customer-facing pipeline, the entire pipeline is consolidated into a sin
 
 ### Output formats
 
-### FLAMES-style fastq format (--out-fmt=flames, default)
+### FLAMES-style fastq format (`--out-fmt=flames`, default)
 This is a standard fastq file, except that read headers follow the following format:
 
 @XXXX-YYYY-ZZZZ\_UUUUUUUUUUUU#READID
 
-* XXXX, YYYY and ZZZZ are the 3 barcodes which identify a specific cell
-* UUUUUUUUUUUU is the 12-nt UMI
-* READID is the original read ID.
+* `XXXX`, `YYYY` and `ZZZZ` are the 3 barcodes which identify a specific cell
+* `UUUUUUUUUUUU` is the 12-nt UMI
+* `READID` is the original read ID.
 
 An example could be
  
@@ -69,7 +69,7 @@ which would correspond to sequencing read VH00444:319:AAFV5MHM5:1:1101:18421:236
 
 
 ### PB-style bam format (--out-fmt=bam)
-This is the binary equivalent of the above [PB-style sam format](#PB-style-sam-format---out-fmt=sam), and should be equivalent to using --out-fmt=sam followed by sam-to-bam conversion with a third-party tool.
+This is the binary equivalent of the above [PB-style sam format](#PB-style-sam-format---out-fmt=sam), and should be equivalent to using `--out-fmt=sam` followed by sam-to-bam conversion with a third-party tool.
 
 # Downstream analysis
 
