@@ -15,14 +15,13 @@ As mentioned above, this pipeline is not customer-facing, so no commands are giv
 ![In-house demultiplexing pipeline overview](img/in-house.png)
 ### bam2fastq
 
-Takes fastq reads from the ONT Dorado basecaller in HAC/SUP modes or the PacBio Kinnex Skera output.
-For basecallers which produce bam output, conversion to fastq is required. This can be readily achieved with gnutils, samtools and/or dedicated tools.
+The input to the demultiplexing pipeline is a set of basecalled reads. These are typically the output of the ONT Dorado basecaller (either "hac" or "sup" accuracy modes) or the basecalled output of a PacBio Kinnex Skera experiment.
+The following step expect reads to be in the fastq format, so, for basecallers which produce bam output, initial conversion to fastq is required. This can be readily achieved with gnutils, samtools and/or dedicated tools.
 
 ### darwin.sh
 
-Screens the barcoding architecture of fastq reads.
-Samples reads and clusters them into "species" based on shared barcode and adapter patterns.
-Generates a report of "species" of reads for visual inspection of library artifacts, including chimeric reads.
+This in-house tool screens the overall structure of (a sample of) sequencing reads to identify groups with a common structure in terms of barcodes and adapters ("species").
+It generates a species report which can be visually inspected as a form of QC and to identify common library artifacts, including chimeric reads.
 
 ### split.sh
 
@@ -35,12 +34,12 @@ This is the core demultiplexing tool.
 * Uses a one-shot mathematical decoding algorithm to detect and identify BC triplets in individual reads.
 * Operates autonomously, without requiring complementary short reads.
 * Scales efficiently with respect to the number of BC triplets, avoiding exhaustive alignment to external whitelists.
-* Generates a matrix of barcode calls with their corresponding confidences (.dat).
+* Generates a matrix of barcode calls with their corresponding confidence values (.dat).
 * Further details on ArgenTag barcoding tech are available [here](https://pubmed.ncbi.nlm.nih.gov/27259539/).
 
 ### post\_demux.sh
 
-Takes the matrix of barcode calls and confidences and applies sanity checks and filtering criteria to remove dubious barcode calls, untagged molecules, unligated adapters and other unwanted reads. Generates fastq files with confident associations of transcript reads to BC triplets, ready for cell calling
+This final step takes the matrix of barcode calls and confidence values and applies sanity checks and filtering criteria to remove dubious barcode calls, untagged molecules, unligated adapters and other unwanted reads. Generates fastq files with confident associations of transcript reads to BC triplets, ready for downstream analysis (e.g. with the [FLAMES-based downstream analysis pipeline](#FLAMES-based-downstream-analysis-pipeline)).
 
 ## Customer-facing demultiplexing pipeline
 
@@ -64,12 +63,13 @@ For the customer-facing pipeline, the entire pipeline is consolidated into a sin
 
 #### Example command
 
-    taggy_demux -i basecalled.bam -o out -m 150 -t $(( $(nproc) - 2 ))
+    NUM_THREADS=$(( $(nproc) - 2 ))
+    taggy_demux -i basecalled.bam -o out -m 150 -t $NUM_THREADS
 
 ### Output formats
 
 #### FLAMES-style fastq format (`--out-fmt=flames`, default)
-This is a standard fastq file, except that read headers follow the following format:
+This is like the standard fastq format, except that read headers follow the following structure:
 
     @XXXX-YYYY-ZZZZ_UUUUUUUUUUUU#READID
 
@@ -84,13 +84,19 @@ An example could be
 which would correspond to sequencing read VH00444:319:AAFV5MHM5:1:1101:18421:23605, which has been tagged with the barcode triplet (0076, 0048, 0089) and the UMI "ATACCGGCTACA".
 
 #### PB-style sam format (`--out-fmt=sam`)
-TBD.
+This format follows the [SAM format specification](http://samtools.github.io/hts-specs/SAMv1.pdf) maintained by the SAM/BAM Format Specification Working Group, making use of the optional tags to encode additional information relevant to barcode demultiplexing and single-cell analysis. Consistency with the [PacBio BAM format specification](https://pacbiofileformats.readthedocs.io/en/13.0/BAM.html) is maintained whenever possible. In particular, the following tags are used:
+
+| Tag		| Data type	| Description				|
+| --------- | --------- | -----------				|
+| CB		| Z			| Corrected cell barcode.	|
+| CR		| Z			| Raw (uncorrected) cell barcode. |
+| rc		| i			| Predicted real cell. This is 1 if a read is predicted to come from a real cell and 0 if predicted to be a non-real cell. |
 
 #### PB-style bam format (`--out-fmt=bam`)
-This is the binary equivalent of the above [PB-style sam format](#pb-style-sam-format---out-fmtsam), and should be equivalent to using `--out-fmt=sam` followed by sam-to-bam conversion with a third-party tool.
+This is the binary version of the above [PB-style sam format](#pb-style-sam-format---out-fmtsam), and should be equivalent to using `--out-fmt=sam` followed by sam-to-bam conversion with a third-party tool.
 
 #### scNanoGPS-style fastq format (`--out-fmt=scnano`)
-This is a standard fastq file, except that read headers follow the following format:
+This is like the standard fastq format, except that read headers follow the following structure:
 
     @READID_UUUUUUUUUUUU
 
@@ -113,9 +119,9 @@ For this format, the barcode is not included in the content of the fastq file, b
 
 ### FLAMES Counter
 
-Performs gene and transcript quantification at the cell level
-Generates gene and transcript count matrices from minimap2 alignment of fastq cell files to a genome reference and its GFF3 annotation file
-Produces gene and GFF3 isoform annotation files
+Performs gene and transcript quantification at the cell level.
+Generates gene and transcript count matrices from minimap2 alignment of fastq cell files to a genome reference and its GFF3 annotation file.
+Produces gene and GFF3 isoform annotation files.
 This module reuses parts of [FLAMES](https://github.com/mritchielab/FLAMES/) version 1.9.0, date 2023-10-02, for transcript quantification and isoform annotation.
 
 
@@ -124,12 +130,12 @@ This module reuses parts of [FLAMES](https://github.com/mritchielab/FLAMES/) ver
 
 ### AT ISe
 Description:
-Acts as an interface between FlamesCounter outputs and Seurat inputs
-Generate a genes x BCs matrix (R object) suitable for Seurat input
-Converts original gene IDs to gene names to ensure Seurat compatibility
+Acts as an interface between FlamesCounter outputs and Seurat inputs.
+Generate a genes x BCs matrix (R object) suitable for Seurat input.
+Converts original gene IDs to gene names to ensure Seurat compatibility.
 
 Input: Gene Count Matrix (CSV)
-Output: Gene Count Matrix (R) 
+Output: Gene Count Matrix (R)
 
 ### Seurat
 
@@ -138,7 +144,7 @@ Third-party tool, included for reference/completeness. Reference version is v.5.
 Input: Gene Count Matrix (R matrix) 
 Output: Seurat Final Results 
 Description:
-Implements major components for QC, analysis, and exploration of single-cell RNA-seq data at the gene level
+Implements major components for QC, analysis, and exploration of single-cell RNA-seq data at the gene level.
 * Performs quality control on the gene count matrix, removing low-quality cells and genes.
 * Applies standard LogNormalization and identifies highly variable genes.
 * Determines the dimensionality of the filtered gene count matrix using PCA.
@@ -165,4 +171,3 @@ Output: Final SCISO Results
 Description:
 * Cleans the given Transcript Count Matrix with Polished Isoform Annotation Files.
 * Generates an isoform-based UMAP clustering of cells.
-
