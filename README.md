@@ -86,11 +86,15 @@ which would correspond to sequencing read VH00444:319:AAFV5MHM5:1:1101:18421:236
 #### PB-style sam format (`--out-fmt=sam`)
 This format follows the [SAM format specification](http://samtools.github.io/hts-specs/SAMv1.pdf) maintained by the SAM/BAM Format Specification Working Group, making use of the optional tags to encode additional information relevant to barcode demultiplexing and single-cell analysis. Consistency with the [PacBio BAM format specification](https://pacbiofileformats.readthedocs.io/en/13.0/BAM.html) is maintained whenever possible. In particular, the following tags are used:
 
-| Tag		| Data type	| Description				|
-| --------- | --------- | -----------				|
-| CB		| Z			| Corrected cell barcode.	|
-| CR		| Z			| Raw (uncorrected) cell barcode. |
-| rc		| i			| Predicted real cell. This is 1 if a read is predicted to come from a real cell and 0 if predicted to be a non-real cell. |
+| Tag	| Data type	| Description				|
+| ----- | -------------	| -----------				|
+| CB	| Z		| Corrected cell barcode.	|
+| CR	| Z		| Raw (uncorrected) cell barcode. |
+| rc	| i		| Predicted real cell. This is 1 if a read is predicted to come from a real cell and 0 if predicted to be a non-real cell. |
+| XM    | Z             | Raw (after tag) or corrected (after correct) UMI. |
+| XA    | Z             | Order of tags names. |
+
+Note that the above does not preclude the presence of other tags added by third-party tools, which will be preserved to the largest extent possible.
 
 An example SAM entry (line) is shown below:
 
