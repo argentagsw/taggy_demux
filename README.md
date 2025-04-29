@@ -53,8 +53,8 @@ For the customer-facing pipeline, the entire pipeline is consolidated into a sin
     w: Use a custom whitelist file.
     P: Maximum number of linker bases to align.
     R: Maximum number of read bases to align.
-    D: Maximum edit distance to consider for alignment (-1 means no limit). If float and < 1, intepreted as a relative maximum edit dist. If float and > 1, rounded down. The default is no limit (-1).
-    T: Number of threads to use. Default is 1.
+    D: Maximum edit distance to consider for alignment (-1 means no limit). If float and < 1, intepreted as a relative maximum edit dist. If float and > 1, rounded down. The default is 3.
+    T: Number of threads to use. The default is 1.
 
 #### Example command
 
@@ -196,8 +196,8 @@ These and other options are shown below:
     C: Use a custom config file.
     R: Use a custom round setup.
     c: Use a custom prefix.
-    t: Use this many threads. Default is the number of processors (as reported by nproc) minus one.
-    E: Use this maximum edit distance when searching for chimeras. Higher values mean less stringency (more true positives, but also more false positives). An integer is interpreted as an edit distance. A real value < 1 is interpreted as a relative edit distance. Default is 0.12 (12%).
+    t: Use this many threads. The default is the number of processors (as reported by nproc) minus one.
+    E: Use this maximum edit distance when searching for chimeras. Higher values mean less stringency (more true positives, but also more false positives). An integer is interpreted as an edit distance. A real value < 1 is interpreted as a relative edit distance. The default is 0.12 (12%).
     d: Run in debug mode.
     p: Preserve temporary files instead of deleting.
 
