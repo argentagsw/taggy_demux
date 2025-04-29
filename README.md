@@ -49,22 +49,17 @@ For the customer-facing pipeline, the entire pipeline is consolidated into a sin
 
 ### Usage
 
-    i) INPUT_PATH_OR_FILE
-    o) OUTPUT_DIR
-    s) SAMPLE_SIZE 
-    n) CONFIDENCE_THRESH
-    m) MIN_LENGTH
-    M) MAX_LENGTH
-    c) EXP_CODE
-    t) NUM_THREADS
-    E) MAX_EDIT_DIST
-    d) DEBUG_MODE
-    p) PRESERVE_TMP
+    o: Output directory. The default is the current directory (.).
+    w: Use a custom whitelist file.
+    P: Maximum number of linker bases to align.
+    R: Maximum number of read bases to align.
+    D: Maximum edit distance to consider for alignment (-1 means no limit). If float and < 1, intepreted as a relative maximum edit dist. If float and > 1, rounded down. The default is no limit (-1).
+    T: Number of threads to use. Default is 1.
 
 #### Example command
 
     NUM_THREADS=$(( $(nproc) - 2 ))
-    taggy_demux -i basecalled.bam -o out -m 150 -t $NUM_THREADS
+    bin/taggy_demux -t $NUM_THREADS -o out -D 3 -s <path_to_input.fastq>
 
 ### Output formats
 
@@ -179,3 +174,33 @@ Output: Final SCISO Results
 Description:
 * Cleans the given Transcript Count Matrix with Polished Isoform Annotation Files.
 * Generates an isoform-based UMAP clustering of cells.
+
+## Chimera splitting
+
+As an optional step before demultiplexing, reads can be run through the `split.sh` bash script to split common chimeric reads. The script takes a fastq file as input and produces a new fastq file where reads with common chimeras have been split.
+
+### Usage
+
+The basic command for running the chimera splitting script is the following:
+
+    bin/split.sh -i <path_to_input.fastq> -o <path_to_output.fastq>
+
+These and other options are shown below:
+
+    i: Input fastq file.
+    o: Output fastq file.
+    s: Process only this many reads.
+    m: Filter reads smaller than this value.
+    M: Filter reads larger than this value.
+    G: Use a custom tmp folder. The default is whatever mktemp uses.
+    C: Use a custom config file.
+    R: Use a custom round setup.
+    c: Use a custom prefix.
+    t: Use this many threads. Default is the number of processors (as reported by nproc) minus one.
+    E: Use this maximum edit distance when searching for chimeras. Higher values mean less stringency (more true positives, but also more false positives). An integer is interpreted as an edit distance. A real value < 1 is interpreted as a relative edit distance. Default is 0.12 (12%).
+    d: Run in debug mode.
+    p: Preserve temporary files instead of deleting.
+
+Processing multiple input files is currently handled externally:
+
+    for inputfile in input_folder/*.fastq; do bin/split.sh -i $inputfile -o $inputfile.split; done
