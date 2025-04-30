@@ -192,7 +192,7 @@ These and other options are shown below:
     s: Process only this many reads.
     m: Filter reads smaller than this value.
     M: Filter reads larger than this value.
-    G: Use a custom tmp folder. The default is whatever mktemp uses.
+    G: Use a custom tmp folder. The default is to create via `mktemp -d`.
     C: Use a custom config file.
     R: Use a custom round setup.
     c: Use a custom prefix.

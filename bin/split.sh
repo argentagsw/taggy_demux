@@ -80,8 +80,6 @@ fi
 if [ -z "$TMP_DIR_GLOBAL" ]
 then
   TMP_DIR_GLOBAL=$(mktemp -d)
-else
-  TMP_DIR_GLOBAL=$(mktemp -d -t "$TMP_DIR_GLOBAL")
 fi
 
 echo "Filtering reads ${MIN_LENGTH:+shorter than $MIN_LENGTH }${MAX_LENGTH:+longer than $MAX_LENGTH }and counting them"
@@ -195,7 +193,7 @@ then
   rm "$TMP_DIR_GLOBAL"/size-selected_*.fastq
   rm "$TMP_DIR_GLOBAL"/size-selected.fastq
   rm "$TMP_DIR_GLOBAL"/"$EXP_CODE".lines
-  rm -r "$TMP_DIR_GLOBAL"
+  #rm -r "$TMP_DIR_GLOBAL"
 fi
 
 echo "Finished running split.sh on $INPUT_PATH_OR_FILE"
