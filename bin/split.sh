@@ -12,13 +12,13 @@ INPUT_PATH_OR_FILE=.
 ROUNDS=S
 
 ALIGN_BIN="$BIN_DIR"/align
-RES_DIR="$BASE_RES_DIR"/demux/config
+RES_DIR="$BASE_RES_DIR"/
 
 MAX_EDIT_DIST="0.12"
 AMPLICON_LIST="1"
 
 EXP_CODE=split_exp
-ROUND_CONFIG_FILE_PARAM=res/roundS_config.sh
+ROUND_CONFIG_FILE_PARAM="$BASE_RES_DIR"/roundS_config.sh
 
 while getopts ":i:o:s:m:M:G:C:R:c:t:E:d5Op" opt; do
   case $opt in
@@ -80,6 +80,8 @@ fi
 if [ -z "$TMP_DIR_GLOBAL" ]
 then
   TMP_DIR_GLOBAL=$(mktemp -d)
+else
+  TMP_DIR_GLOBAL=$(mktemp -d -p $TMP_DIR_GLOBAL)
 fi
 
 echo "Filtering reads ${MIN_LENGTH:+shorter than $MIN_LENGTH }${MAX_LENGTH:+longer than $MAX_LENGTH }and counting them"
