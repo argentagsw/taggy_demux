@@ -1,9 +1,7 @@
 bin/align
 bin/taggy_demux
-res/
-inc/
-src/
 ref/
+res/
 out/
 obj/
 data/
