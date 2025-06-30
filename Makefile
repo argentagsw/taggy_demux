@@ -2,6 +2,8 @@ SUBDIRS = align taggy_demux
 
 .PHONY: all clean align taggy
 
+default: all
+
 align:
 	$(MAKE) -C align -f Makefile all; \
 
