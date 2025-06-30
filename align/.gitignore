@@ -1,10 +1,7 @@
-res/
-inc/
-src/
-ref/
 out/
 obj/
 data/
+bin/
 *.swp
 tags
 tmp
