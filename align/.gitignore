@@ -5,3 +5,6 @@ bin/
 *.swp
 tags
 tmp
+Makefile
+inc/
+src/
