@@ -12,7 +12,13 @@ Both pipeline versions are briefly described below. For the customer-facing pipe
 
 ![Customer-facing demultiplexing pipeline](img/customer-facing.png)
 
-For the customer-facing pipeline, the entire pipeline is consolidated into a single binary to make it more user friendly. The input is a file of basecalled reads in bam format, while the output is a set of demultiplexed, trimmed reads in one of the [supported formats](#output-formats).
+For the customer-facing pipeline, the entire pipeline is consolidated into a single binary to make it more user friendly. The input is a file of basecalled reads isam format, while the output is a set of demultiplexed, trimmed reads in one of the [supported formats](#output-formats).
+
+### Installation
+
+    git clone https://github.com/argentagsw/taggy_demux.git
+    cd taggy_demux
+    make
 
 ### Usage
 
@@ -25,8 +31,8 @@ For the customer-facing pipeline, the entire pipeline is consolidated into a sin
 
 #### Example command
 
-    NUM_THREADS=$(( $(nproc) - 2 ))
-    bin/taggy_demux -t $NUM_THREADS -o out -D 3 -s <path_to_input.fastq>
+    #Run with 8 threads
+    bin/taggy_demux -t 8 -o out -D 3 -s <path_to_input.fastq>
 
 ### Output formats
 
