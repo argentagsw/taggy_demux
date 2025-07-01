@@ -14,25 +14,41 @@ Both pipeline versions are briefly described below. For the customer-facing pipe
 
 For the customer-facing pipeline, the entire pipeline is consolidated into a single binary to make it more user friendly. The input is a file of basecalled reads isam format, while the output is a set of demultiplexed, trimmed reads in one of the [supported formats](#output-formats).
 
-### Installation
-
-    git clone https://github.com/argentagsw/taggy_demux.git
-    cd taggy_demux
-    make
-
 ### Usage
 
-    o: Output directory. The default is the current directory (.).
-    w: Use a custom whitelist file.
-    P: Maximum number of linker bases to align.
-    R: Maximum number of read bases to align.
-    D: Maximum edit distance to consider for alignment (-1 means no limit). If float and < 1, intepreted as a relative maximum edit dist. If float and > 1, rounded down. The default is 3.
-    T: Number of threads to use. The default is 1.
+    Usage: taggy_demux [OPTION...] input-file
+    taggy_demux -- a demultiplexer for ArgenTag reads
+    
+      -D, --max-edit-d=INT/FLOAT Maximum edit distance to consider for alignment
+                                 (-1 means no limit). If float and < 1, intepreted
+                                 as a relative maximum edit dist. If float and >
+                                 1,rounded down. [-1]
+      -f, --in-fmt=STRING        Format for input read file. Valid values are
+                                 "fastq", "sam". [fastq]
+      -F, --out-fmt=STRING       Format for output read file. Valid values are
+                                 "flames", "scnano", "sam". [flames]
+      -o, --output-dir=DIR       Output directory. [Current directory]
+      -P, --preserve             Preserve tags in original sam record. Only
+                                 meaningful if --in-fmt=sam and --out-fmt=sam.
+                                 [FALSE]
+      -R, --max-r-bases=INT      Maximum number of bases from read to align (-1
+                                 means no limit) [-1]
+      -s, --start-4-rev          Print the start coordinate of the alignment for
+                                 revese sense hits [FALSE]
+      -T, --num-threads=INT      Use INT parallel threads [1]
+      -w, --whitelist=FILE       Barcode whitelist file. [Default]
+      -?, --help                 Give this help list
+          --usage                Give a short usage message
+    
+    Mandatory or optional arguments to long options are also mandatory or optional
+    for any corresponding short options.
 
 #### Example command
 
+    #Split chimeras (optional, see "Chimera splitting" below)
+    bin/split.sh -i <path_to_input.fastq> -o <path_to_output.fastq>
     #Run with 8 threads
-    bin/taggy_demux -t 8 -o out -D 3 -s <path_to_input.fastq>
+    bin/taggy_demux -t 8 --in-fmt=fastq --out-fmt=flames -o out -s <path_to_input.fastq>
 
 ### Output formats
 
@@ -93,7 +109,7 @@ For this format, the barcode is not included in the content of the fastq file, b
 
 ## Chimera splitting
 
-As an optional step before demultiplexing, reads can be run through the `split.sh` bash script to split common chimeric reads. The script takes a fastq file as input and produces a new fastq file where reads with common chimeras have been split.
+As an optional step before demultiplexing, reads can be run through the `split.sh` bash script to split common chimeric reads. The script takes a fastq file as input and produces a new fastq file where reads with common chimeras have been splitThis will be incorporated into the main binary in future releases.
 
 ### Usage
 
