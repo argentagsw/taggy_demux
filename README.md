@@ -46,9 +46,9 @@ For the customer-facing pipeline, the entire pipeline is consolidated into a sin
 #### Example command
 
     #Split chimeras (optional, see "Chimera splitting" below)
-    bin/split.sh -i <path_to_input.fastq> -o <path_to_output.fastq>
+    bin/split.sh -i raw_data.fastq -o dechmierized_data.fastq
     #Run with 8 threads
-    bin/taggy_demux -t 8 --in-fmt=fastq --out-fmt=flames -o out -s <path_to_input.fastq>
+    bin/taggy_demux -t 8 --in-fmt=fastq --out-fmt=flames -o out -s dechimerized_data.fastq
 
 ### Output formats
 
