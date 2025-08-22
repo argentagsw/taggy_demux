@@ -76,8 +76,6 @@ An example could be
 
 which would correspond to sequencing read VH00444:319:AAFV5MHM5:1:1101:18421:23605, which has been tagged with the barcode triplet (0076, 0048, 0089) and the UMI "ATACCGGCTACA".
 
-<!--
-
 #### PB-style sam format (`--out-fmt=sam`)
 This format follows the [SAM format specification](http://samtools.github.io/hts-specs/SAMv1.pdf) maintained by the SAM/BAM Format Specification Working Group, making use of the optional tags to encode additional information relevant to barcode demultiplexing and single-cell analysis. Consistency with the [PacBio BAM format specification](https://pacbiofileformats.readthedocs.io/en/13.0/BAM.html) is maintained whenever possible. In particular, the following tags are used:
 
@@ -95,8 +93,12 @@ An example SAM entry (line) is shown below:
 
     molecule/0      4       *       0       255     *       *       0       0       GGCAYTCATG[...]CGATGGCTAG *       CB:Z:AACCAAGGAGGTAGAT   XA:Z:XM-CB      XM:Z:CGCGACTGTTCT       ic:i:1  im:Z:m84112_240530_215351_s2/139986042/ccs/40_4082      is:i:1  it:Z:CGCGACTGTTCTAACCAAGGAGGTAGAT       rc:i:1  RG:Z:e4927d21   zm:i:0
 
+<!--
+
 #### PB-style bam format (`--out-fmt=bam`)
 This is the binary version of the above [PB-style sam format](#pb-style-sam-format---out-fmtsam), and should be equivalent to using `--out-fmt=sam` followed by sam-to-bam conversion with a third-party tool.
+
+-->
 
 #### scNanoGPS-style fastq format (`--out-fmt=scnano`)
 This is like the standard fastq format, except that read headers follow the following structure:
@@ -113,8 +115,6 @@ An example could be
 which would correspond to sequencing read VH00444:319:AAFV5MHM5:1:1101:18421:23605, which has been tagged with the UMI "ATACCGGCTACA".
 
 For this format, the barcode is not included in the content of the fastq file, but is instead provided in the file name (one file per barcode combination/cell).
-
--->
 
 ## Chimera splitting
 
