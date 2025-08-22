@@ -15,19 +15,24 @@ Both pipeline versions are briefly described below. For the customer-facing pipe
 For the customer-facing pipeline, the entire pipeline is consolidated into a single binary to make it more user friendly. The input is a file of basecalled reads isam format, while the output is a set of demultiplexed, trimmed reads in one of the [supported formats](#output-formats).
 
 ### Usage
-
+    
     Usage: taggy_demux [OPTION...] input-file
     taggy_demux -- a demultiplexer for ArgenTag reads
     
       -D, --max-edit-d=INT/FLOAT Maximum edit distance to consider for alignment
                                  (-1 means no limit). If float and < 1, intepreted
                                  as a relative maximum edit dist. If float and >
-                                 1,rounded down. [-1]
+                                 1,rounded down. [3]
       -f, --in-fmt=STRING        Format for input read file. Valid values are
                                  "fastq", "sam". [fastq]
       -F, --out-fmt=STRING       Format for output read file. Valid values are
                                  "flames", "scnano", "sam". [flames]
+      -h, --keep-header          Preserve SAM header in output. Only meaningful if
+                                 --in-fmt=sam and --out-fmt=sam. [FALSE]
       -o, --output-dir=DIR       Output directory. [Current directory]
+      -O, --orient=STRING        Orientation in which to output reads (one of
+                                 "sense", "anti", "preserve" or "invert". [sense]
+      -p, --trim-poly            Trim polyA/T from output sequences.
       -P, --preserve             Preserve tags in original sam record. Only
                                  meaningful if --in-fmt=sam and --out-fmt=sam.
                                  [FALSE]
@@ -35,7 +40,10 @@ For the customer-facing pipeline, the entire pipeline is consolidated into a sin
                                  means no limit) [-1]
       -s, --start-4-rev          Print the start coordinate of the alignment for
                                  revese sense hits [FALSE]
+      -t, --trim-TSO             Trim TSO (if found) from output sequences.
       -T, --num-threads=INT      Use INT parallel threads [1]
+      -u, --umi-start=INT        Use INT as UMI start coordinate [25]
+      -U, --umi-end=INT          Use INT as UMI end coordinate [38]
       -w, --whitelist=FILE       Barcode whitelist file. [Default]
       -?, --help                 Give this help list
           --usage                Give a short usage message
