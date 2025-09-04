@@ -29,17 +29,18 @@ For the customer-facing pipeline, the entire pipeline is consolidated into a sin
                                  "flames", "scnano", "sam". [flames]
       -h, --keep-header          Preserve SAM header in output. Only meaningful if
                                  --in-fmt=sam and --out-fmt=sam. [FALSE]
+      -k, --keep-failed          Keep failed reads and set nb tag to -1. Only
+                                 meaningful if --out-fmt=sam. [FALSE]
       -o, --output-dir=DIR       Output directory. [Current directory]
       -O, --orient=STRING        Orientation in which to output reads (one of
                                  "sense", "anti", "preserve" or "invert". [sense]
-      -p, --trim-poly            Trim polyA/T from output sequences.
+      -p, --trim-poly=STRING     Trim polyA/T from output sequences. Valid values
+                                 are "none", "strict", "normal", "lenient". [none]
       -P, --preserve             Preserve tags in original sam record. Only
                                  meaningful if --in-fmt=sam and --out-fmt=sam.
                                  [FALSE]
       -R, --max-r-bases=INT      Maximum number of bases from read to align (-1
                                  means no limit) [-1]
-      -s, --start-4-rev          Print the start coordinate of the alignment for
-                                 revese sense hits [FALSE]
       -t, --trim-TSO             Trim TSO (if found) from output sequences.
       -T, --num-threads=INT      Use INT parallel threads [1]
       -u, --umi-start=INT        Use INT as UMI start coordinate [25]
