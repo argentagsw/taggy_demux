@@ -19,14 +19,14 @@ For the customer-facing pipeline, the entire pipeline is consolidated into a sin
     Usage: taggy_demux [OPTION...] input-file
     taggy_demux -- a demultiplexer for ArgenTag reads
     
-      -D, --max-edit-d=INT/FLOAT Maximum edit distance to consider for alignment
-                                 (-1 means no limit). If float and < 1, intepreted
-                                 as a relative maximum edit dist. If float and >
-                                 1,rounded down. [3]
+      -D, --max-edit-d=INT/FLOAT Maximum edit distance to consider for linker
+                                 alignment (-1 means no limit). If float and < 1,
+                                 intepreted as a relative maximum edit dist. If
+                                 float and > 1, rounded down. [3]
       -f, --in-fmt=STRING        Format for input read file. Valid values are
                                  "fastq", "sam". [fastq]
       -F, --out-fmt=STRING       Format for output read file. Valid values are
-                                 "flames", "scnano", "sam". [flames]
+                                 "flames", "fastq", "scnano", "sam". [flames]
       -h, --keep-header          Preserve SAM header in output. Only meaningful if
                                  --in-fmt=sam and --out-fmt=sam. [FALSE]
       -k, --keep-failed          Keep failed reads and set nb tag to -1. Only
@@ -41,10 +41,11 @@ For the customer-facing pipeline, the entire pipeline is consolidated into a sin
                                  [FALSE]
       -R, --max-r-bases=INT      Maximum number of bases from read to align (-1
                                  means no limit) [-1]
-      -t, --trim-TSO             Trim TSO (if found) from output sequences.
+      -t, --trim-TSO             Trim TSO (if found) from output sequences. [FALSE]
+                                
       -T, --num-threads=INT      Use INT parallel threads [1]
-      -u, --umi-start=INT        Use INT as UMI start coordinate [25]
-      -U, --umi-end=INT          Use INT as UMI end coordinate [38]
+      -u, --umi-start=INT        Use INT as UMI start coordinate. [25]
+      -U, --umi-end=INT          Use INT as UMI end coordinate. [38]
       -w, --whitelist=FILE       Barcode whitelist file. [Default]
       -?, --help                 Give this help list
           --usage                Give a short usage message
@@ -67,7 +68,22 @@ This is like the standard fastq format, except that read headers follow the foll
 
     @XXXX-YYYY-ZZZZ_UUUUUUUUUUUU#READID
 
-* `XXXX`, `YYYY` and `ZZZZ` are the 3 barcodes which identify a specific cell
+* `XXXX`, `YYYY` and `ZZZZ` are the 3 barcodes which identify a specific cell.
+* `UUUUUUUUUUUU` is the 12-nt UMI.
+* `READID` is the original read ID.
+
+An example could be
+ 
+    @0076-0048-0089_ATACCGGCTACA#VH00444:319:AAFV5MHM5:1:1101:18421:23605
+
+which would correspond to sequencing read VH00444:319:AAFV5MHM5:1:1101:18421:23605, which has been tagged with the barcode triplet (0076, 0048, 0089) and the UMI "ATACCGGCTACA".
+
+#### Fastq format (`--out-fmt=fastq`, default)
+This uses a standard fastq format, except that read headers follow the following structure:
+
+    @BBBBBBBBBBBBBBBB_UUUUUUUUUUUU#READID
+
+* `BBBBBBBBBBBBBBBB` is a unique 16-nt barcode which identifies a specific cell. This results from a mapping, so it will not appear verbatim in the original basecalled sequence.
 * `UUUUUUUUUUUU` is the 12-nt UMI.
 * `READID` is the original read ID.
 
