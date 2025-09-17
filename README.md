@@ -12,7 +12,7 @@ Both pipeline versions are briefly described below. For the customer-facing pipe
 
 ![Customer-facing demultiplexing pipeline](img/customer-facing.png)
 
-For the customer-facing pipeline, the entire pipeline is consolidated into a single binary to make it more user friendly. The input is a file of basecalled reads isam format, while the output is a set of demultiplexed, trimmed reads in one of the [supported formats](#output-formats).
+For the customer-facing pipeline, the entire pipeline (except for an optional [chimera splitting step](#chimera-splitting)) is consolidated into a single binary to make it more user friendly. The input is a file of basecalled reads in sam or fastq format, while the output is a set of demultiplexed, trimmed reads in one of the [supported output formats](#output-formats).
 
 ### Usage
     
