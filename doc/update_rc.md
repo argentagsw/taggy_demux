@@ -1,5 +1,7 @@
 # Usage Guide - update_rc.sh
 
+![RC tag update workflow](img/rc-update-workflow.png)
+
 ## 1. Setup Environment
 
 Create a new environment using the [provided environment file](AT2PB.conda_env.yml):

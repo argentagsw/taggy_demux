@@ -37,5 +37,5 @@ This is the core demultiplexing tool.
 
 ### post\_demux.sh
 
-This final step takes the matrix of barcode calls and confidence values and applies sanity checks and filtering criteria to remove dubious barcode calls, untagged molecules, unligated adapters and other unwanted reads. Generates fastq files with confident associations of transcript reads to BC triplets, ready for downstream analysis (e.g. with the [FLAMES-based downstream analysis pipeline](../README.md#FLAMES-based-downstream-analysis-pipeline)).
+This final step takes the matrix of barcode calls and confidence values and applies sanity checks and filtering criteria to remove dubious barcode calls, untagged molecules, unligated adapters and other unwanted reads. Generates fastq files with confident associations of transcript reads to BC triplets, ready for downstream analysis (e.g. with the [FLAMES-based downstream analysis pipeline](../README.md#ont-data-and-flames-based-downstream-analysis-pipeline)).
 
