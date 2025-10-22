@@ -1,16 +1,16 @@
 # ArgenTag single-cell read demultiplexing pipelines
 
-Demultiplexing refers to the process of identifying the barcode(s) that each sequencing read from a given sequencing experiment is tagged with. Reads with common barcodes are assigned to the same cell. Currently, there are two alternatives for demultiplexing single-cell data generated on the ArgenTag platform:
+Demultiplexing refers to the process of identifying the barcode(s) that each sequencing read from a given single-cell sequencing experiment is tagged with. Reads with common barcodes are assigned to the same cell. Currently, there are two alternatives for demultiplexing single-cell data generated on the ArgenTag platform:
 
-+ **Customer-facing pipeline**. For users who are unwilling or unable to disclose sequencing data (e.g. due to regulatory requirements), we provide a simplified standalone version of our software which can be run directly by users. This version of the pipeline is briefly described below, and example commands are provided.
++ **Customer-facing pipeline**. For users who want to maintain full control of their analysis or are otherwise unwilling or unable to disclose sequencing data (e.g. due to regulatory requirements), we provide a simplified standalone version of our software which can be run directly by users. This version of the pipeline is briefly described below, and example commands are provided.
 
-+ **In-house single-cell pipeline**. This is the processing pipeline used internally by the ArgenTag team to process internally and externally generated data. Typically, users upload their data to ArgenTag's AWS servers, where it is processed by our team to generate demultiplexed read files along with reports and supplementary fi This pipeline is describen in a [separate page](doc/in-house.md).
++ **In-house single-cell pipeline**. This is the processing pipeline used internally by the ArgenTag team to process internally- and externally-generated data. Typically, users upload their data to ArgenTag's cloud servers, where it is processed by our team to generate demultiplexed read files along with reports and supplementary files. This pipeline is described on a [separate page](doc/in-house.md).
 
-In either case, the main output of the pipeline is a set of demultiplexed, trimmed reads. These can be fed to a downstream analysis pipeline, including the [Iso-Seq pipeline](#Iso-Seq-pipeline) (recommended for PacBio reads) and the [FLAMES-based downstream analysis pipeline](#FLAMES-based-downstream-analysis-pipeline) (recommended for ONT reads). Downstream analysis is covered here only briefly, but users are encouraged to see the provided [examples](#Examples-and-downstream-analysis) and the documentation for their tool of choice for further details.
+In either case, the main output of the pipeline is a set of demultiplexed, trimmed reads. These can be fed to a downstream analysis pipeline, including the [Iso-Seq pipeline](#pacbio-data-and-iso-seq-downstream-analysis-pipeline) (recommended for PacBio reads) and the [FLAMES-based downstream analysis pipeline](#ont-data-and-flames-based-downstream-analysis-pipeline) (recommended for ONT reads). Downstream analysis is covered here only briefly, but users are encouraged to see the provided [examples](#Examples-and-downstream-analysis) and the documentation for their tool of choice for further details.
 
 ## Customer-facing demultiplexing pipeline
 
-![Customer-facing demultiplexing pipeline](img/customer-facing.png)
+![Customer-facing demultiplexing pipeline](doc/img/customer-facing.png)
 
 For the customer-facing pipeline, the entire pipeline (except for an optional [chimera splitting step](#chimera-splitting)) is consolidated into a single binary to make it more user friendly. The input is a file of basecalled reads in sam or fastq format, while the output is a set of demultiplexed, trimmed reads in one of the [supported output formats](#output-formats).
 
@@ -172,7 +172,7 @@ For data generated on the PacBio platform, we recommend using the SAM input form
 
 Described [here](doc/update_rc.md)
 
-![RC tag update workflow](img/rc-update-workflow.png)
+![RC tag update workflow](doc/img/rc-update-workflow.png)
 
 ### Iso-Seq downstream analysis pipeline
 
@@ -192,6 +192,6 @@ For data generated on the ONT platform, we recommend running the optional [chime
 
 ### FLAMES-based downstream analysis pipeline
 
-![FLAMES-based downstream analysis pipeline overview](img/FLAMES-based.png)
+![FLAMES-based downstream analysis pipeline overview](doc/img/FLAMES-based.png)
 
 The output from the previous commands can then be analyzed with our [FLAMES-based downstream analysis pipeline](https://github.com/argentagsw/at_flames)
