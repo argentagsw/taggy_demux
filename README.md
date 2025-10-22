@@ -1,12 +1,12 @@
 # ArgenTag single-cell read demultiplexing pipelines
 
-Demultiplexing refers to the process of identifying the barcode(s) that each sequencing read from sequencing experiment is tagged with. Reads with common barcodes are assigned to the same cell. Currently, there are two alternatives for demultiplexing single-cell data generated on the ArgenTag platform:
+Demultiplexing refers to the process of identifying the barcode(s) that each sequencing read from a given sequencing experiment is tagged with. Reads with common barcodes are assigned to the same cell. Currently, there are two alternatives for demultiplexing single-cell data generated on the ArgenTag platform:
 
-+ **Customer-facing pipeline**. For users who are unwilling or unable to disclose sequencing data (e.g. due to regulatory requirements), we also provide a simplified standalone version of our software which can be run directly by users.
++ **Customer-facing pipeline**. For users who are unwilling or unable to disclose sequencing data (e.g. due to regulatory requirements), we provide a simplified standalone version of our software which can be run directly by users. This version of the pipeline is briefly described below, and example commands are provided.
 
-* **In-house single-cell pipeline**. This is the main processing pipeline used internally by the ArgenTag team to process internally and externally generated data. Typically, users upload their data to ArgenTag's AWS servers, where it is processed by our team to generate demultiplexed read files along with reports and supplementary files.
++ **In-house single-cell pipeline**. This is the processing pipeline used internally by the ArgenTag team to process internally and externally generated data. Typically, users upload their data to ArgenTag's AWS servers, where it is processed by our team to generate demultiplexed read files along with reports and supplementary fi This pipeline is describen in a [separate page](doc/in-house.md).
 
-Both pipeline versions are briefly described below. For the customer-facing pipeline, example commands are also provided. In either case, the main output of the pipeline is a set of demultiplexed, trimmed reads, which can be fed to a downstream analysis pipeline (e.g. the [FLAMES-based downstream analysis pipeline](#FLAMES-based-downstream-analysis-pipeline)). Downstream analysis is covered here only briefly, but users are encouraged to see the documentation for their tool of choice for further details.
+In either case, the main output of the pipeline is a set of demultiplexed, trimmed reads. These can be fed to a downstream analysis pipeline, including the [Iso-Seq pipeline](#Iso-Seq-pipeline) (recommended for PacBio reads) and the [FLAMES-based downstream analysis pipeline](#FLAMES-based-downstream-analysis-pipeline) (recommended for ONT reads). Downstream analysis is covered here only briefly, but users are encouraged to see the provided [examples](#Examples-and-downstream-analysis) and the documentation for their tool of choice for further details.
 
 ## Customer-facing demultiplexing pipeline
 
@@ -53,14 +53,6 @@ For the customer-facing pipeline, the entire pipeline (except for an optional [c
     Mandatory or optional arguments to long options are also mandatory or optional
     for any corresponding short options.
 
-#### Example command
-
-    #Split chimeras (optional, see "Chimera splitting" below)
-    bin/split.sh -i raw_data.fastq -o dechmierized_data.fastq
-    #Run with 8 threads
-    mkdir output_dir
-    bin/taggy_demux -T 8 --in-fmt=fastq --out-fmt=flames -o output_dir -s dechimerized_data.fastq
-
 ### Output formats
 
 #### FLAMES-style fastq format (`--out-fmt=flames`, default)
@@ -78,7 +70,7 @@ An example could be
 
 which would correspond to sequencing read VH00444:319:AAFV5MHM5:1:1101:18421:23605, which has been tagged with the barcode triplet (0076, 0048, 0089) and the UMI "ATACCGGCTACA".
 
-#### Fastq format (`--out-fmt=fastq`, default)
+#### Fastq format (`--out-fmt=fastq`)
 This uses a standard fastq format, except that read headers follow the following structure:
 
     @BBBBBBBBBBBBBBBB_UUUUUUUUUUUU#READID
@@ -161,99 +153,45 @@ These and other options are shown below:
 
 Processing multiple input files is currently handled externally:
 
-    for inputfile in input_folder/*.fastq; do bin/split.sh -i $inputfile -o $inputfile.split; done
+    for inputfile in <path_to_input_files>/*.fastq; do bin/split.sh -i "$inputfile" -o "$inputfile".split; done
 
-## In-house demultiplexing pipeline
+# Examples and downstream analysis
 
-As mentioned above, this pipeline is not customer-facing, so no commands are given below, but an overall description of the process is given to aid the user in understanding the data analysis performed by the ArgenTag team and make sense of the provided output files.
+## PacBio data and Iso-Seq downstream analysis pipeline
 
-![In-house demultiplexing pipeline overview](img/in-house.png)
-### bam2fastq
+For data generated on the PacBio platform, we recommend using the SAM input format (`--in-fmt=sam`), as well as the PacBio-compatible SAM format (`--out-fmt=sam`). Conversion from SAM to BAM and viceversa can be handled via samtools (ideally in place, via process substitution):
 
-The input to the demultiplexing pipeline is a set of basecalled reads. These are typically the output of the ONT Dorado basecaller (either "hac" or "sup" accuracy modes) or the basecalled output of a PacBio Kinnex Skera experiment.
-The following step expect reads to be in the fastq format, so, for basecallers which produce bam output, initial conversion to fastq is required. This can be readily achieved with gnutils, samtools and/or dedicated tools.
+### Example commands
+    #Convert S-read bam file to sam in place via process substitution, and run demux binary
+    NUM_THREADS=32
+    bin/taggy_demux -T "$NUM_THREADS" -o "$OUT_DIR" --orient sense --in-fmt=sam --out-fmt=sam --preserve --trim-TSO --trim-poly normal --keep-header <(samtools view -h segmented.bam)
+    #Convert demultiplexed sam output back to bam
+    samtools view -bS "$OUT_DIR"/demux.sam > "$OUT_DIR"/demux.bam
 
-### darwin.sh
+### RC tag updating
 
-This in-house tool screens the overall structure of (a sample of) sequencing reads to identify groups with a common structure in terms of barcodes and adapters ("species").
-It generates a species report which can be visually inspected as a form of QC and to identify common library artifacts, including chimeric reads.
+Described [here](doc/update_rc.md)
 
-### split.sh
+![RC tag update workflow](img/rc-update-workflow.png)
 
-If chimeric reads are detected, split.sh can be optionally run to split them and generate dechmierized raw read files, suitable for demultiplexing.
-The darwin tool can optionally be run again and a second report generated to check for successfull chimera splitting (dechmierization).
+### Iso-Seq downstream analysis pipeline
 
-### demux.sh
+The output from the previous commands is compatible with the [Iso-Seq pipeline, starting from the deduplication step (Step 6)](https://isoseq.how/umi/cli-workflow.html#step-6---deduplication)
 
-This is the core demultiplexing tool.
-* Uses a one-shot mathematical decoding algorithm to detect and identify BC triplets in individual reads.
-* Operates autonomously, without requiring complementary short reads.
-* Scales efficiently with respect to the number of BC triplets, avoiding exhaustive alignment to external whitelists.
-* Generates a matrix of barcode calls with their corresponding confidence values (.dat).
-* Further details on ArgenTag barcoding tech are available [here](https://pubmed.ncbi.nlm.nih.gov/27259539/).
+## ONT data and FLAMES-based downstream analysis pipeline
 
-### post\_demux.sh
+For data generated on the ONT platform, we recommend running the optional [chimera splitting step](#chimera-splitting) and outputting in the FLAMES-compatible fastq format (`--out-fmt=flames`) for direct compatibility with our [FLAMES-based downstream analysis pipeline](#FLAMES-based-downstream-analysis-pipeline).
 
-This final step takes the matrix of barcode calls and confidence values and applies sanity checks and filtering criteria to remove dubious barcode calls, untagged molecules, unligated adapters and other unwanted reads. Generates fastq files with confident associations of transcript reads to BC triplets, ready for downstream analysis (e.g. with the [FLAMES-based downstream analysis pipeline](#FLAMES-based-downstream-analysis-pipeline)).
+### Example commands
 
-# Downstream analysis
+    #Split chimeras (optional, see "Chimera splitting" below)
+    bin/split.sh -i "$INPUT_FASTQ_FILE" -o "$DECHMIERIZED_FASTQ_FILE"
+    #Run with 8 threads
+    mkdir "$OUT_DIR"
+    bin/taggy_demux -T 8 --in-fmt=fastq --out-fmt=flames -o "$OUT_DIR" -s "$DECHMIERIZED_FASTQ_FILE"
 
-## FLAMES-based downstream analysis pipeline
+### FLAMES-based downstream analysis pipeline
 
 ![FLAMES-based downstream analysis pipeline overview](img/FLAMES-based.png)
 
-### FLAMES Counter
-
-Performs gene and transcript quantification at the cell level.
-Generates gene and transcript count matrices from minimap2 alignment of fastq cell files to a genome reference and its GFF3 annotation file.
-Produces gene and GFF3 isoform annotation files.
-This module reuses parts of [FLAMES](https://github.com/mritchielab/FLAMES/) version 1.9.0, date 2023-10-02, for transcript quantification and isoform annotation.
-
-
-* Input: FASTQ Cell Files
-* Output: Gene Count Matrix (CSV), Transcript Count Matrix (CSV), Isoform Annotation Files (GFF3) 
-
-### AT ISe
-Description:
-Acts as an interface between FlamesCounter outputs and Seurat inputs.
-Generate a genes x BCs matrix (R object) suitable for Seurat input.
-Converts original gene IDs to gene names to ensure Seurat compatibility.
-
-Input: Gene Count Matrix (CSV)
-Output: Gene Count Matrix (R)
-
-### Seurat
-
-Third-party tool, included for reference/completeness. Reference version is v.5.0.3.
-
-Input: Gene Count Matrix (R matrix) 
-Output: Seurat Final Results 
-Description:
-Implements major components for QC, analysis, and exploration of single-cell RNA-seq data at the gene level.
-* Performs quality control on the gene count matrix, removing low-quality cells and genes.
-* Applies standard LogNormalization and identifies highly variable genes.
-* Determines the dimensionality of the filtered gene count matrix using PCA.
-* Generates UMAP clusters of cells and produces gene marker files for these clusters.
-
-For detailed methodologies, please refer to the respective documentation for [Seurat](https://satijalab.org/seurat/articles/get_started_v5_new).
-
-### SQANTI3
-
-Third-party tool, included for reference/completeness. Reference version is v.5.2.1.
-Input: Raw Isoform GFF3 annotation file  
-Output: Polished Isoform Annotation file (GFF3), SQANTI3 Final Results
-Description:
-* Implements quality control, filtering, and characterization of long read-defined transcriptomes at the bulk level.
-* Generates a raw isoform report with classification categories and QC metrics.
-* Produces a curated isoform report by applying automatic isoform filtering and rescue rules.
-* Rules for isoform curation are sequencing platform-specific; ONT rules are more stringent than PacBio ones.
-
-For detailed methodologies, please refer to the respective documentation for [SQANTI3](https://github.com/ConesaLab/SQANTI3/wiki/Introduction-to-SQANTI3).
-
-### AT SCISO (under development)
-Input: Polished GFF3 Isoform Annotation Files, Transcript Count Matrix (CSV)
-Output: Final SCISO Results
-Description:
-* Cleans the given Transcript Count Matrix with Polished Isoform Annotation Files.
-* Generates an isoform-based UMAP clustering of cells.
-
+The output from the previous commands can then be analyzed with our [FLAMES-based downstream analysis pipeline](https://github.com/argentagsw/at_flames)

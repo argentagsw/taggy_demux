@@ -2,7 +2,7 @@
 
 ## 1. Setup Environment
 
-Download the [provided environment file](AT2PB.conda_env.yml) and create a new environment:
+Create a new environment using the [provided environment file](AT2PB.conda_env.yml):
 
     conda env create -f AT2PB.conda_env.yml
     conda activate at2pb_isoseq
