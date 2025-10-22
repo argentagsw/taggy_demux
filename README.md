@@ -44,8 +44,8 @@ For the customer-facing pipeline, the entire pipeline (except for an optional [c
       -t, --trim-TSO             Trim TSO (if found) from output sequences. [FALSE]
                                 
       -T, --num-threads=INT      Use INT parallel threads [1]
-      -u, --umi-start=INT        Use INT as UMI start coordinate. [25]
-      -U, --umi-end=INT          Use INT as UMI end coordinate. [38]
+      -u, --umi-start=INT        Use INT as UMI start coordinate. [26]
+      -U, --umi-end=INT          Use INT as UMI end coordinate. [37]
       -w, --whitelist=FILE       Barcode whitelist file. [Default]
       -?, --help                 Give this help list
           --usage                Give a short usage message
@@ -85,7 +85,7 @@ An example could be
 
 which would correspond to sequencing read VH00444:319:AAFV5MHM5:1:1101:18421:23605, which has been tagged with the cell barcode "ACGTGCAGCAGACGGT" and the UMI "ATACCGGCTACA".
 
-#### PB-style sam format (`--out-fmt=sam`)
+#### PacBio-style sam format (`--out-fmt=sam`)
 This format follows the [SAM format specification](http://samtools.github.io/hts-specs/SAMv1.pdf) maintained by the SAM/BAM Format Specification Working Group, making use of the optional tags to encode additional information relevant to barcode demultiplexing and single-cell analysis. Consistency with the [PacBio BAM format specification](https://pacbiofileformats.readthedocs.io/en/13.0/BAM.html) is maintained whenever possible. In particular, the following tags are used:
 
 | Tag	| Data type	| Description				|
@@ -96,7 +96,7 @@ This format follows the [SAM format specification](http://samtools.github.io/hts
 | XM    | Z             | Raw (after tag) or corrected (after correct) UMI. |
 | XA    | Z             | Order of tags names. |
 
-Note that the above does not preclude the presence of other tags added by third-party tools, which will be preserved to the largest extent possible.
+Note that the above does not preclude the presence of other tags added by third-party tools, which will be preserved if the `--preserve` flag is set.
 
 An example SAM entry (line) is shown below:
 
@@ -104,8 +104,8 @@ An example SAM entry (line) is shown below:
 
 <!--
 
-#### PB-style bam format (`--out-fmt=bam`)
-This is the binary version of the above [PB-style sam format](#pb-style-sam-format---out-fmtsam), and should be equivalent to using `--out-fmt=sam` followed by sam-to-bam conversion with a third-party tool.
+#### PacBio-style bam format (`--out-fmt=bam`)
+This is the binary version of the above [PacBio-style sam format](#pacbio-style-sam-format---out-fmtsam), and should be equivalent to using `--out-fmt=sam` followed by sam-to-bam conversion with a third-party tool.
 
 -->
 
@@ -162,7 +162,7 @@ Processing multiple input files is currently handled externally:
 For data generated on the PacBio platform, we recommend using the SAM input format (`--in-fmt=sam`), as well as the PacBio-compatible SAM format (`--out-fmt=sam`). Conversion from SAM to BAM and viceversa can be handled via samtools (ideally in place, via process substitution), as detailed below.
 
 ### Example commands
-    #Convert S-read bam file to sam in place via process substitution, and run demux binary
+    #Convert S-read bam file to sam in place via process substitution, and run demux binary with 32 threads
     NUM_THREADS=32
     bin/taggy_demux -T "$NUM_THREADS" -o "$OUT_DIR" --orient sense --in-fmt=sam --out-fmt=sam --preserve --trim-TSO --trim-poly normal --keep-header <(samtools view -h segmented.bam)
     #Convert demultiplexed sam output back to bam
@@ -176,7 +176,7 @@ Described [here](doc/update_rc.md)
 
 ### Iso-Seq downstream analysis pipeline
 
-The output from the previous commands is compatible with the [Iso-Seq pipeline, starting from the deduplication step (Step 6)](https://isoseq.how/umi/cli-workflow.html#step-6---deduplication)
+The output from the previous commands is compatible with the [Iso-Seq pipeline, starting from the deduplication step (Step 6)](https://isoseq.how/umi/cli-workflow.html#step-6---deduplication).
 
 ## ONT data and FLAMES-based downstream analysis pipeline
 
@@ -184,14 +184,15 @@ For data generated on the ONT platform, we recommend running the optional [chime
 
 ### Example commands
 
-    #Split chimeras (optional, see "Chimera splitting" below)
+    #Split chimeras (optional, see "Chimera splitting" above)
     bin/split.sh -i "$INPUT_FASTQ_FILE" -o "$DECHMIERIZED_FASTQ_FILE"
-    #Run with 8 threads
+    #Run with 32 threads
+	NUM_THREADS=32
     mkdir "$OUT_DIR"
-    bin/taggy_demux -T 8 --in-fmt=fastq --out-fmt=flames -o "$OUT_DIR" -s "$DECHMIERIZED_FASTQ_FILE"
+    bin/taggy_demux -T "$NUM_THREADS" --in-fmt=fastq --out-fmt=flames -o "$OUT_DIR" --trim-TSO --trim-poly lenient "$DECHMIERIZED_FASTQ_FILE"
 
 ### FLAMES-based downstream analysis pipeline
 
-![FLAMES-based downstream analysis pipeline overview](doc/img/FLAMES-based.png)
-
 The output from the previous commands can then be analyzed with our [FLAMES-based downstream analysis pipeline](https://github.com/argentagsw/at_flames)
+
+![FLAMES-based downstream analysis pipeline overview](doc/img/FLAMES-based.png)
