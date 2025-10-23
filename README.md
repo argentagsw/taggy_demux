@@ -55,6 +55,34 @@ For the customer-facing pipeline, the entire pipeline (except for an optional [c
 
 ### Output formats
 
+#### PacBio-style sam format (`--out-fmt=sam`)
+This format follows the [SAM format specification](http://samtools.github.io/hts-specs/SAMv1.pdf) maintained by the SAM/BAM Format Specification Working Group, making use of the optional tags to encode additional information relevant to barcode demultiplexing and single-cell analysis. Consistency with the [PacBio BAM format specification](https://pacbiofileformats.readthedocs.io/en/13.0/BAM.html) is maintained. In particular, the following tags are added:
+
+| Tag	| Data type	| Description				|
+| ----- | -------------	| -----------				|
+| XA    | Z             | Order of tags names. Set to `"XM-CB"`. |
+| gp    | i             | Specifies whether or not the barcode for the given read passes. Set to `1` for passing reads. |
+| CB	| Z		| Corrected cell barcode. |
+| CR	| Z		| Raw (uncorrected) cell barcode. Set equal to CB. |
+| XC	| Z		| Raw cell barcode. Set equal to XC. |
+| rc	| i		| Predicted real cell. Set to `1` for *all* reads because `taggy_demux` does *not* perform background RNA filtering (elbow plot analysis). See the section on [Updating of the `rc` tag](#Updating-of-the-rc-tag) for details on how to achieve this.|
+| nc	| i		| Number of candidate barcodes. Set to `1`. |
+| nb	| i		| Edit distance from the barcode for the read to the barcode to which it was reassigned. Set to `0`. |
+| XM    | Z             | Raw (after tag) or corrected (after correct) UMI. |
+
+The above does not preclude the presence of other tags previously added by third-party tools, which will be preserved if the `--preserve` flag is set (only meaningful if `--in-fmt=sam` and `--out-fmt=sam`).
+
+An example SAM entry (line) is shown below:
+
+    molecule/0      4       *       0       255     *       *       0       0       GGCAYTCATG[...]CGATGGCTAG *       CB:Z:AACCAAGGAGGTAGAT   XA:Z:XM-CB      XM:Z:CGCGACTGTTCT       ic:i:1  im:Z:m84112_240530_215351_s2/139986042/ccs/40_4082      is:i:1  it:Z:CGCGACTGTTCTAACCAAGGAGGTAGAT       rc:i:1  RG:Z:e4927d21   zm:i:0
+
+<!--
+
+#### PacBio-style bam format (`--out-fmt=bam`)
+This is the binary version of the above [PacBio-style sam format](#pacbio-style-sam-format---out-fmtsam), and should be equivalent to using `--out-fmt=sam` followed by sam-to-bam conversion with a third-party tool.
+
+-->
+
 #### FLAMES-style fastq format (`--out-fmt=flames`, default)
 This is like the standard fastq format, except that read headers follow the following structure:
 
@@ -70,12 +98,12 @@ An example could be
 
 which would correspond to sequencing read VH00444:319:AAFV5MHM5:1:1101:18421:23605, which has been tagged with the barcode triplet (0076, 0048, 0089) and the UMI "ATACCGGCTACA".
 
-#### Fastq format (`--out-fmt=fastq`)
+#### Fastq format with mapped barcode (`--out-fmt=fastq`)
 This uses a standard fastq format, except that read headers follow the following structure:
 
     @BBBBBBBBBBBBBBBB_UUUUUUUUUUUU#READID
 
-* `BBBBBBBBBBBBBBBB` is a unique 16-nt barcode which identifies a specific cell. This results from a mapping, so it will not appear verbatim in the original basecalled sequence.
+* `BBBBBBBBBBBBBBBB` is a unique 16-nt nucleotide pseudobarcode which identifies a specific cell. This results from a mapping from ArgenTag's barcode triplets to a single 16-nt sequence, which is artificial and will not appear verbatim in the original basecalled sequence.
 * `UUUUUUUUUUUU` is the 12-nt UMI.
 * `READID` is the original read ID.
 
@@ -84,30 +112,6 @@ An example could be
     @ACGTGCAGCAGACGGT_ATACCGGCTACA#VH00444:319:AAFV5MHM5:1:1101:18421:23605
 
 which would correspond to sequencing read VH00444:319:AAFV5MHM5:1:1101:18421:23605, which has been tagged with the cell barcode "ACGTGCAGCAGACGGT" and the UMI "ATACCGGCTACA".
-
-#### PacBio-style sam format (`--out-fmt=sam`)
-This format follows the [SAM format specification](http://samtools.github.io/hts-specs/SAMv1.pdf) maintained by the SAM/BAM Format Specification Working Group, making use of the optional tags to encode additional information relevant to barcode demultiplexing and single-cell analysis. Consistency with the [PacBio BAM format specification](https://pacbiofileformats.readthedocs.io/en/13.0/BAM.html) is maintained whenever possible. In particular, the following tags are used:
-
-| Tag	| Data type	| Description				|
-| ----- | -------------	| -----------				|
-| CB	| Z		| Corrected cell barcode.	|
-| CR	| Z		| Raw (uncorrected) cell barcode. |
-| rc	| i		| Predicted real cell. This is 1 if a read is predicted to come from a real cell and 0 if predicted to be a non-real cell. |
-| XM    | Z             | Raw (after tag) or corrected (after correct) UMI. |
-| XA    | Z             | Order of tags names. |
-
-Note that the above does not preclude the presence of other tags added by third-party tools, which will be preserved if the `--preserve` flag is set.
-
-An example SAM entry (line) is shown below:
-
-    molecule/0      4       *       0       255     *       *       0       0       GGCAYTCATG[...]CGATGGCTAG *       CB:Z:AACCAAGGAGGTAGAT   XA:Z:XM-CB      XM:Z:CGCGACTGTTCT       ic:i:1  im:Z:m84112_240530_215351_s2/139986042/ccs/40_4082      is:i:1  it:Z:CGCGACTGTTCTAACCAAGGAGGTAGAT       rc:i:1  RG:Z:e4927d21   zm:i:0
-
-<!--
-
-#### PacBio-style bam format (`--out-fmt=bam`)
-This is the binary version of the above [PacBio-style sam format](#pacbio-style-sam-format---out-fmtsam), and should be equivalent to using `--out-fmt=sam` followed by sam-to-bam conversion with a third-party tool.
-
--->
 
 #### scNanoGPS-style fastq format (`--out-fmt=scnano`)
 This is like the standard fastq format, except that read headers follow the following structure:
@@ -168,7 +172,7 @@ For data generated on the PacBio platform, we recommend using the SAM input form
     #Convert demultiplexed sam output back to bam
     samtools view -bS "$OUT_DIR"/demux.sam > "$OUT_DIR"/demux.bam
 
-### RC tag updating
+### Updating of the `rc` tag
 
 Described [here](doc/update_rc.md)
 
