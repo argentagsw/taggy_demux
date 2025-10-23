@@ -184,7 +184,7 @@ For data generated on the PacBio platform, we recommend using the SAM input form
 
 ### Updating of the `rc` tag
 
-The demultiplexed read file generated above (`demux.sam/bam`) has the `rc` tag set to `1` for *all* reads because `taggy_demux` does *not* perform background RNA filtering (elbow plot analysis). If their downstream processing pipeline does not include background RNA filtering, users can leverage Described [here](doc/update_rc.md)
+The demultiplexed read file generated above (`demux.sam/bam`) has the `rc` tag set to `1` for *all* reads because `taggy_demux` does *not* perform background RNA filtering (elbow plot analysis). If their downstream processing pipeline does not include this step, users can leverage `isoseq bcstats` to perform background RNA filtering based on their desired criterion and follow [this auxiliary guide](doc/update_rc.md) to update the `rc` tag as appropriate using the provided [convenience script](bin/update_rc.sh).
 
 ![RC tag update workflow](doc/img/rc-update-workflow.png)
 

@@ -1,4 +1,6 @@
-# Usage Guide - update_rc.sh
+# Updating of the `rc` tag (`update_rc.sh`)
+
+The demultiplexed read file generated above (`demux.sam/bam`) has the `rc` tag set to `1` for *all* reads because `taggy_demux` does *not* perform background RNA filtering (elbow plot analysis). If their downstream processing pipeline does not include background RNA filtering, users can follow this short guide to update the ´rc´ tag based on their desired criterion by leveraging `isoseq bcstats` and the provided [convenience script](../bin/update_rc.sh)
 
 ![RC tag update workflow](img/rc-update-workflow.png)
 
@@ -18,7 +20,7 @@ Verify installation:
 
 Make the script executable:
 
-    chmod +x update_rc.sh
+    chmod +x bin/update_rc.sh
 
 ##3. Run Workflow
 
@@ -38,7 +40,7 @@ Execute the pipeline:
     isoseq bcstats -o $BCSTATS_REPORT $DEMUX_SORTED
     
     # Apply isoseq cell calling to demux sorted BAM
-    ./update_rc.sh -i $DEMUX_SORTED -b $BCSTATS_REPORT -o $OUTPUT -t 8 -v
+    bin/update_rc.sh -i $DEMUX_SORTED -b $BCSTATS_REPORT -o $OUTPUT -t 8 -v
 
 ## 4. Key Arguments
 
@@ -53,4 +55,3 @@ Execute the pipeline:
 * Output BAM ready for isoseq groupdedup
 * Supports any isoseq bcstats percentile method
 * Use conda deactivate when finished
-
