@@ -22,7 +22,7 @@ Make the script executable:
 
     chmod +x bin/update_rc.sh
 
-##3. Run Workflow
+## 3. Run Workflow
 
 Set your file paths:
 
