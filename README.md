@@ -131,7 +131,7 @@ For this format, the barcode is not included in the content of the fastq file, b
 
 ## Chimera splitting
 
-As an optional step before demultiplexing, reads can be run through the `split.sh` bash script to split common chimeric reads. The script takes a fastq file as input and produces a new fastq file where reads with common chimeras have been split. For split reads, each resulting subread keeps the original read ID, followed by and underscore and the subread number (e.g. if read ID `@VH00444:319:AAFV5MHM5:1:1101:18421:23605` is split into two, this will result in two subreads `@VH00444:319:AAFV5MHM5:1:1101:18421:23605_1` and `@VH00444:319:AAFV5MHM5:1:1101:18421:23605_2`). This feature will be incorporated into the main binary in future releases.
+As an optional step before demultiplexing, reads can be run through the `split.sh` bash script to split common chimeric reads. The script takes a fastq file as input and produces a new fastq file where reads with common chimeras have been split. For split reads, each resulting subread keeps the original read ID, followed by a dash and the subread number (e.g. if read ID `@VH00444:319:AAFV5MHM5:1:1101:18421:23605` is split into two, this will result in two subreads `@VH00444:319:AAFV5MHM5:1:1101:18421:23605_1` and `@VH00444:319:AAFV5MHM5:1:1101:18421:23605-2`). This feature will be incorporated into the main binary in future releases.
 
 ### Usage
 
