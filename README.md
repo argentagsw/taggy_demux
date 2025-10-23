@@ -163,9 +163,19 @@ Processing multiple input files is currently handled externally:
 
 ## PacBio data and Iso-Seq downstream analysis pipeline
 
-For data generated on the PacBio platform, we recommend using the SAM input format (`--in-fmt=sam`), as well as the PacBio-compatible SAM format (`--out-fmt=sam`). Conversion from SAM to BAM and viceversa can be handled via samtools (ideally in place, via process substitution), as detailed below.
+For data generated on the PacBio platform, we recommend using the SAM input format (`--in-fmt=sam`), as well as the PacBio-compatible SAM format (`--out-fmt=sam`). Conversion from SAM to BAM and viceversa can be handled via samtools or similar (ideally in place, via process substitution), as detailed below. The input file is typically a segmented read file obtained from Skera (`segmented.bam` below), but can also be a regular CCS file.
 
 ### Example commands
+    #Convert input bam file to sam
+	samtools view -h segmented.bam > segmented.sam
+    #Run demux binary with 32 threads from sam input
+    NUM_THREADS=32
+	mkdir -p "$OUT_DIR"
+    bin/taggy_demux -T "$NUM_THREADS" -o "$OUT_DIR" --orient sense --in-fmt=sam --out-fmt=sam --preserve --trim-TSO --trim-poly normal --keep-header segmented.sam
+    #Convert demultiplexed sam output back to bam
+    samtools view -bS "$OUT_DIR"/demux.sam > "$OUT_DIR"/demux.bam
+	
+### Example commands (with in place bam-to-sam conversion)
     #Convert S-read bam file to sam in place via process substitution, and run demux binary with 32 threads
     NUM_THREADS=32
     bin/taggy_demux -T "$NUM_THREADS" -o "$OUT_DIR" --orient sense --in-fmt=sam --out-fmt=sam --preserve --trim-TSO --trim-poly normal --keep-header <(samtools view -h segmented.bam)
@@ -174,7 +184,7 @@ For data generated on the PacBio platform, we recommend using the SAM input form
 
 ### Updating of the `rc` tag
 
-Described [here](doc/update_rc.md)
+The demultiplexed read file generated above (`demux.sam/bam`) has the `rc` tag set to `1` for *all* reads because `taggy_demux` does *not* perform background RNA filtering (elbow plot analysis). If their downstream processing pipeline does not include background RNA filtering, users can leverage Described [here](doc/update_rc.md)
 
 ![RC tag update workflow](doc/img/rc-update-workflow.png)
 
@@ -186,17 +196,29 @@ The output from the previous commands is compatible with the [Iso-Seq pipeline, 
 
 For data generated on the ONT platform, we recommend running the optional [chimera splitting step](#chimera-splitting) and outputting in the FLAMES-compatible fastq format (`--out-fmt=flames`) for direct compatibility with our [FLAMES-based downstream analysis pipeline](#FLAMES-based-downstream-analysis-pipeline).
 
-### Example commands
+### Example commands for a single fastq file
 
     #Split chimeras (optional, see "Chimera splitting" above)
     bin/split.sh -i "$INPUT_FASTQ_FILE" -o "$DECHMIERIZED_FASTQ_FILE"
     #Run with 32 threads
 	NUM_THREADS=32
-    mkdir "$OUT_DIR"
+    mkdir -p "$OUT_DIR"
     bin/taggy_demux -T "$NUM_THREADS" --in-fmt=fastq --out-fmt=flames -o "$OUT_DIR" --trim-TSO --trim-poly lenient "$DECHMIERIZED_FASTQ_FILE"
+
+### Example commands for multiple fastq files
+
+    #Split chimeras (optional, see "Chimera splitting" above)
+	for inputfile in "$INPUT_DIR"/*.fastq
+	do
+	    bin/split.sh -i "$inputfile" -o "$inputfile".split
+	done
+    #Run with 32 threads
+	NUM_THREADS=32
+    mkdir -p "$OUT_DIR"
+    bin/taggy_demux -T "$NUM_THREADS" --in-fmt=fastq --out-fmt=flames -o "$OUT_DIR" --trim-TSO --trim-poly lenient <(cat "$INPUT_DIR"/*.fastq.split)
 
 ### FLAMES-based downstream analysis pipeline
 
-The output from the previous commands can then be analyzed with our [FLAMES-based downstream analysis pipeline](https://github.com/argentagsw/at_flames)
+The output from the previous commands can then be analyzed with our [FLAMES-based downstream analysis pipeline](https://github.com/argentagsw/at_flames).
 
 ![FLAMES-based downstream analysis pipeline overview](doc/img/FLAMES-based.png)
