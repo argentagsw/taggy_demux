@@ -65,7 +65,7 @@ This format follows the [SAM format specification](http://samtools.github.io/hts
 | CB	| Z		| Corrected cell barcode. |
 | CR	| Z		| Raw (uncorrected) cell barcode. Set equal to CB. |
 | XC	| Z		| Raw cell barcode. Set equal to XC. |
-| rc	| i		| Predicted real cell. Set to `1` for *all* reads because `taggy_demux` does *not* perform background RNA filtering (elbow plot analysis). See the section on [Updating of the `rc` tag](#Updating-of-the-rc-tag) for details on how to achieve this.|
+| rc	| i		| Predicted real cell. Set to `1` for *all* reads because `taggy_demux` does *not* perform real cell identification (also known as background RNA filtering or elbow plot analysis). See the section on [Updating of the `rc` tag](#Updating-of-the-rc-tag) for details on how to achieve this.|
 | nc	| i		| Number of candidate barcodes. Set to `1`. |
 | nb	| i		| Edit distance from the barcode for the read to the barcode to which it was reassigned. Set to `0`. |
 | XM    | Z             | Raw (after tag) or corrected (after correct) UMI. |
@@ -184,7 +184,7 @@ For data generated on the PacBio platform, we recommend using the SAM input form
 
 ### Updating of the `rc` tag
 
-The demultiplexed read file generated above (`demux.sam/bam`) has the `rc` tag set to `1` for *all* reads because `taggy_demux` does *not* perform background RNA filtering (elbow plot analysis). If their downstream processing pipeline does not include this step, users can leverage `isoseq bcstats` to perform background RNA filtering based on their desired criterion and follow [this auxiliary guide](doc/update_rc.md) to update the `rc` tag as appropriate using the provided [convenience script](bin/update_rc.sh).
+The demultiplexed read file generated above (`demux.sam/bam`) has the `rc` tag set to `1` for *all* reads because `taggy_demux` does *not* perform real cell identification (also known as background RNA filtering or elbow plot analysis). Users can leverage `isoseq bcstats` to perform cell calling based on their desired criterion and follow [this auxiliary guide](doc/update_rc.md) to update the `rc` tag as appropriate using the provided [convenience script](bin/update_rc.sh).
 
 ![RC tag update workflow](doc/img/rc-update-workflow.png)
 
