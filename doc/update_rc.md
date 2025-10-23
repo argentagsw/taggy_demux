@@ -6,9 +6,9 @@ The demultiplexed read file generated above (`demux.sam/bam`) has the `rc` tag s
 
 ## 1. Setup Environment
 
-Create a new environment using the [provided environment file](AT2PB.conda_env.yml):
+Create a new environment using the [provided environment file](../res/AT2PB.conda_env.yml):
 
-    conda env create -f AT2PB.conda_env.yml
+    conda env create -f res/AT2PB.conda_env.yml
     conda activate at2pb_isoseq
 
 Verify installation:
