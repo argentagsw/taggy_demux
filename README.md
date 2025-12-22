@@ -61,13 +61,15 @@ For the customer-facing pipeline, the entire pipeline (except for an optional [c
 
 ### Presets
 
-For convenience, common combinations of flags are grouped into presets, which can be passes via the `-x` flag (or its long form, `--presets`). The following presets are available:
+For convenience, common combinations of flags are grouped into presets, which can be passed via the `-x` flag (or its long form, `--presets`). The following presets are available:
 
 - Bead design
+
     -x v1 / --presets=v1: equivalent to -u 24 -U 39 -c 2 -C 2 
     -x v2 / --presets=v2: equivalent to -u 24 -U 41 -c 4 -C 2
 
 - Sequencing platform
+
     -x hifi / --presets=hifi: equivalent to --in-fmt=sam --out-fmt=sam --max-edit-d=0.1 --orient sense --trim-poly normal --trim-TSO --keep-header --preserve 
     -x ont / --presets=ont: equivalent to --in-fmt=fastq --out-fmt=flames --max-edit-d=0.15 --orient sense --trim-poly lenient --trim-TSO --split-chims
     -x illu / --presets=illu: equivalent to --in-fmt=fastq --out-fmt=fastq --max-edit-d=0.05 --orient sense --trim-poly strict --trim-TSO
@@ -161,23 +163,24 @@ Chimera splitting refers to an optional step run before demultiplexing, whereby 
 For data generated on the PacBio platform, we recommend using the SAM input format (`--in-fmt=sam`), as well as the PacBio-compatible SAM format (`--out-fmt=sam`). Conversion from SAM to BAM and viceversa can be handled via samtools or similar (ideally in place, via process substitution), as detailed below. The input file is typically a segmented read file obtained from Skera (`segmented.bam` below), but can also be a regular CCS file.
 
 ### Example commands
-    #Convert input bam file to sam
+    # Convert input bam file to sam
 	samtools view -h segmented.bam > segmented.sam
-    #Run demux binary with 32 threads from sam input
+    # Run demux binary with 32 threads from sam input
     NUM_THREADS=32
 	mkdir -p "$OUT_DIR"
     bin/taggy_demux -T "$NUM_THREADS" -o "$OUT_DIR" --presets=hifi segmented.sam
-    # Equivalent to
+    # The above command is equivalent to
     # bin/taggy_demux -T "$NUM_THREADS" -o "$OUT_DIR" --orient sense --in-fmt=sam \
     # --out-fmt=sam --preserve --trim-TSO --trim-poly normal --keep-header segmented.sam
-    #Convert demultiplexed sam output back to bam
+    #
+    # Convert demultiplexed sam output back to bam
     samtools view -bS "$OUT_DIR"/demux.sam > "$OUT_DIR"/demux.bam
 	
 ### Example commands (with in place bam-to-sam conversion)
-    #Convert S-read bam file to sam in place via process substitution, and run demux binary with 32 threads
+    # Convert S-read bam file to sam in place via process substitution, and run demux binary with 32 threads
     NUM_THREADS=32
     bin/taggy_demux -T "$NUM_THREADS" -o "$OUT_DIR" --presets=hifi <(samtools view -h segmented.bam)
-    #Convert demultiplexed sam output back to bam
+    # Convert demultiplexed sam output back to bam
     samtools view -bS "$OUT_DIR"/demux.sam > "$OUT_DIR"/demux.bam
 
 ### Updating of the `rc` tag
@@ -196,11 +199,11 @@ For data generated on the ONT platform, we recommend running the optional [chime
 
 ### Example commands for a single fastq file
 
-    #Run with 32 threads and optional chimera splitting step (see "Chimera splitting" above)
+    # Run with 32 threads and optional chimera splitting step (see "Chimera splitting" above)
 	NUM_THREADS=32
     mkdir -p "$OUT_DIR"
     bin/taggy_demux -T "$NUM_THREADS" "$INPUT_FASTQ_FILE"
-    # Equivalent to
+    # The above command is equivalent to
     # bin/taggy_demux -T "$NUM_THREADS" --in-fmt=fastq --out-fmt=flames \
     # -o "$OUT_DIR" --trim-TSO --trim-poly lenient "$INPUT_FASTQ_FILE"
 
