@@ -63,12 +63,12 @@ For the customer-facing pipeline, the entire pipeline (except for an optional [c
 
 For convenience, common combinations of flags are grouped into presets, which can be passed via the `-x` flag (or its long form, `--presets`). The following presets are available:
 
-- Bead design
+Bead design:
 
-    -x v1 / --presets=v1: equivalent to -u 24 -U 39 -c 2 -C 2 
+    -x v1 / --presets=v1: equivalent to -u 24 -U 39 -c 2 -C 2
     -x v2 / --presets=v2: equivalent to -u 24 -U 41 -c 4 -C 2
 
-- Sequencing platform
+Sequencing platform:
 
     -x hifi / --presets=hifi: equivalent to --in-fmt=sam --out-fmt=sam --max-edit-d=0.1 --orient sense --trim-poly normal --trim-TSO --keep-header --preserve 
     -x ont / --presets=ont: equivalent to --in-fmt=fastq --out-fmt=flames --max-edit-d=0.15 --orient sense --trim-poly lenient --trim-TSO --split-chims
