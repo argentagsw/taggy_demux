@@ -19,6 +19,8 @@ For the customer-facing pipeline, the entire pipeline (except for an optional [c
     Usage: taggy_demux [OPTION...] input-file
     taggy_demux -- a demultiplexer for ArgenTag reads
     
+      -c, --umi-pre=INT          Use INT as UMI pre context. [1]
+      -C, --umi-post=INT         Use INT as UMI post context. [1]
       -D, --max-edit-d=INT/FLOAT Maximum edit distance to consider for linker
                                  alignment (-1 means no limit). If float and < 1,
                                  intepreted as a relative maximum edit dist. If
@@ -41,17 +43,36 @@ For the customer-facing pipeline, the entire pipeline (except for an optional [c
                                  [FALSE]
       -R, --max-r-bases=INT      Maximum number of bases from read to align (-1
                                  means no limit) [-1]
+      -s, --split-chims          Split chimeric reads. [FALSE]
       -t, --trim-TSO             Trim TSO (if found) from output sequences. [FALSE]
                                 
       -T, --num-threads=INT      Use INT parallel threads [1]
-      -u, --umi-start=INT        Use INT as UMI start coordinate. [26]
-      -U, --umi-end=INT          Use INT as UMI end coordinate. [37]
+      -u, --umi-start=INT        Use INT as UMI start coordinate. [25]
+      -U, --umi-end=INT          Use INT as UMI end coordinate. [38]
       -w, --whitelist=FILE       Barcode whitelist file. [Default]
+      -x, --presets=STRING       Presets for sequencing technology (hifi, ont,
+                                 illu) and bead design (v1, v2) Can be combined via
+                                 "+" (e.g. --presets=ont+v1 or -x hifi+v2).
       -?, --help                 Give this help list
           --usage                Give a short usage message
     
     Mandatory or optional arguments to long options are also mandatory or optional
     for any corresponding short options.
+
+### Presets
+
+For convenience, common combinations of flags are grouped into presets, which can be passes via the `-x` flag (or its long form, `--presets`). The following presets are available:
+
+- Bead design
+    -x v1 / --presets=v1: equivalent to -u 24 -U 39 -c 2 -C 2 
+    -x v2 / --presets=v2: equivalent to -u 24 -U 41 -c 4 -C 2
+
+- Sequencing platform
+    -x hifi / --presets=hifi: equivalent to --in-fmt=sam --out-fmt=sam --max-edit-d=0.1 --orient sense --trim-poly normal --trim-TSO --keep-header --preserve 
+    -x ont / --presets=ont: equivalent to --in-fmt=fastq --out-fmt=flames --max-edit-d=0.15 --orient sense --trim-poly lenient --trim-TSO --split-chims
+    -x illu / --presets=illu: equivalent to --in-fmt=fastq --out-fmt=fastq --max-edit-d=0.05 --orient sense --trim-poly strict --trim-TSO
+
+Multiple presets can be combined via the `+` character (e.g. `--presets=ont+v2`), and individual settings can be overriden by flags appearing *after* the preset (e.g. `--presets=v1+hifi --out-fmt=fastq` will use general settings for PacBio Hi-Fi reads obtained with v1 beads, except the output will be in fastq format rather than sam (which is the default for this preset).
 
 ### Output formats
 
@@ -131,33 +152,7 @@ For this format, the barcode is not included in the content of the fastq file, b
 
 ## Chimera splitting
 
-As an optional step before demultiplexing, reads can be run through the `split.sh` bash script to split common chimeric reads. The script takes a fastq file as input and produces a new fastq file where reads with common chimeras have been split. For split reads, each resulting subread keeps the original read ID, followed by a dash and the subread number (e.g. if read ID `@VH00444:319:AAFV5MHM5:1:1101:18421:23605` is split into two, this will result in two subreads `@VH00444:319:AAFV5MHM5:1:1101:18421:23605_1` and `@VH00444:319:AAFV5MHM5:1:1101:18421:23605-2`). This feature will be incorporated into the main binary in future releases.
-
-### Usage
-
-The basic command for running the chimera splitting script is the following:
-
-    bin/split.sh -i <path_to_input.fastq> -o <path_to_output.fastq>
-
-These and other options are shown below:
-
-    i: Input fastq file.
-    o: Output fastq file.
-    s: Process only this many reads.
-    m: Filter reads smaller than this value.
-    M: Filter reads larger than this value.
-    G: Use a custom tmp folder. The default is to create via `mktemp -d`.
-    C: Use a custom config file.
-    R: Use a custom round setup.
-    c: Use a custom prefix.
-    t: Use this many threads. The default is the number of processors (as reported by nproc) minus one.
-    E: Use this maximum edit distance when searching for chimeras. Higher values mean less stringency (more true positives, but also more false positives). An integer is interpreted as an edit distance. A real value < 1 is interpreted as a relative edit distance. The default is 0.12 (12%).
-    d: Run in debug mode.
-    p: Preserve temporary files instead of deleting.
-
-Processing multiple input files is currently handled externally:
-
-    for inputfile in <path_to_input_files>/*.fastq; do bin/split.sh -i "$inputfile" -o "$inputfile".split; done
+Chimera splitting refers to an optional step run before demultiplexing, whereby common chimeric reads are split into two or more subreads, which are then processed normally. This was previously done with a standalone "split.sh" script, which has since been merged to the main program as an optional flag `-s` (or its long form `--split-chims`). For split reads, each resulting subread keeps the original read ID, followed by a dash and the subread number (e.g. if read ID `@VH00444:319:AAFV5MHM5:1:1101:18421:23605` is split into two, this will result in two subreads `@VH00444:319:AAFV5MHM5:1:1101:18421:23605_1` and `@VH00444:319:AAFV5MHM5:1:1101:18421:23605-2`).
 
 # Examples and downstream analysis
 
@@ -171,14 +166,17 @@ For data generated on the PacBio platform, we recommend using the SAM input form
     #Run demux binary with 32 threads from sam input
     NUM_THREADS=32
 	mkdir -p "$OUT_DIR"
-    bin/taggy_demux -T "$NUM_THREADS" -o "$OUT_DIR" --orient sense --in-fmt=sam --out-fmt=sam --preserve --trim-TSO --trim-poly normal --keep-header segmented.sam
+    bin/taggy_demux -T "$NUM_THREADS" -o "$OUT_DIR" --presets=hifi segmented.sam
+    # Equivalent to
+    # bin/taggy_demux -T "$NUM_THREADS" -o "$OUT_DIR" --orient sense --in-fmt=sam \
+    # --out-fmt=sam --preserve --trim-TSO --trim-poly normal --keep-header segmented.sam
     #Convert demultiplexed sam output back to bam
     samtools view -bS "$OUT_DIR"/demux.sam > "$OUT_DIR"/demux.bam
 	
 ### Example commands (with in place bam-to-sam conversion)
     #Convert S-read bam file to sam in place via process substitution, and run demux binary with 32 threads
     NUM_THREADS=32
-    bin/taggy_demux -T "$NUM_THREADS" -o "$OUT_DIR" --orient sense --in-fmt=sam --out-fmt=sam --preserve --trim-TSO --trim-poly normal --keep-header <(samtools view -h segmented.bam)
+    bin/taggy_demux -T "$NUM_THREADS" -o "$OUT_DIR" --presets=hifi <(samtools view -h segmented.bam)
     #Convert demultiplexed sam output back to bam
     samtools view -bS "$OUT_DIR"/demux.sam > "$OUT_DIR"/demux.bam
 
@@ -198,24 +196,13 @@ For data generated on the ONT platform, we recommend running the optional [chime
 
 ### Example commands for a single fastq file
 
-    #Split chimeras (optional, see "Chimera splitting" above)
-    bin/split.sh -i "$INPUT_FASTQ_FILE" -o "$DECHMIERIZED_FASTQ_FILE"
-    #Run with 32 threads
+    #Run with 32 threads and optional chimera splitting step (see "Chimera splitting" above)
 	NUM_THREADS=32
     mkdir -p "$OUT_DIR"
-    bin/taggy_demux -T "$NUM_THREADS" --in-fmt=fastq --out-fmt=flames -o "$OUT_DIR" --trim-TSO --trim-poly lenient "$DECHMIERIZED_FASTQ_FILE"
-
-### Example commands for multiple fastq files
-
-    #Split chimeras (optional, see "Chimera splitting" above)
-	for inputfile in "$INPUT_DIR"/*.fastq
-	do
-	    bin/split.sh -i "$inputfile" -o "$inputfile".split
-	done
-    #Run with 32 threads
-	NUM_THREADS=32
-    mkdir -p "$OUT_DIR"
-    bin/taggy_demux -T "$NUM_THREADS" --in-fmt=fastq --out-fmt=flames -o "$OUT_DIR" --trim-TSO --trim-poly lenient <(cat "$INPUT_DIR"/*.fastq.split)
+    bin/taggy_demux -T "$NUM_THREADS" "$INPUT_FASTQ_FILE"
+    # Equivalent to
+    # bin/taggy_demux -T "$NUM_THREADS" --in-fmt=fastq --out-fmt=flames \
+    # -o "$OUT_DIR" --trim-TSO --trim-poly lenient "$INPUT_FASTQ_FILE"
 
 ### FLAMES-based downstream analysis pipeline
 
