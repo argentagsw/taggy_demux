@@ -171,7 +171,8 @@ For data generated on the PacBio platform, we recommend using the SAM input form
     bin/taggy_demux -T "$NUM_THREADS" -o "$OUT_DIR" --presets=hifi segmented.sam
     # The above command is equivalent to
     # bin/taggy_demux -T "$NUM_THREADS" -o "$OUT_DIR" --orient sense --in-fmt=sam \
-    # --out-fmt=sam --preserve --trim-TSO --trim-poly normal --keep-header segmented.sam
+    # --out-fmt=sam --max-edit-d=0.1 --orient sense --trim-poly normal --trim-TSO \
+    # --keep-header --preserve segmented.sam
     #
     # Convert demultiplexed sam output back to bam
     samtools view -bS "$OUT_DIR"/demux.sam > "$OUT_DIR"/demux.bam
@@ -202,10 +203,11 @@ For data generated on the ONT platform, we recommend running the optional [chime
     # Run with 32 threads and optional chimera splitting step (see "Chimera splitting" above)
 	NUM_THREADS=32
     mkdir -p "$OUT_DIR"
-    bin/taggy_demux -T "$NUM_THREADS" "$INPUT_FASTQ_FILE"
+    bin/taggy_demux -T "$NUM_THREADS" --presets=ont "$INPUT_FASTQ_FILE"
     # The above command is equivalent to
-    # bin/taggy_demux -T "$NUM_THREADS" --in-fmt=fastq --out-fmt=flames \
-    # -o "$OUT_DIR" --trim-TSO --trim-poly lenient "$INPUT_FASTQ_FILE"
+    # bin/taggy_demux -T "$NUM_THREADS" -o "$OUT_DIR" --in-fmt=fastq \
+    # --out-fmt=flames --max-edit-d=0.15 --orient sense \
+    # --trim-poly lenient --trim-TSO --split-chims "$INPUT_FASTQ_FILE"
 
 ### FLAMES-based downstream analysis pipeline
 
