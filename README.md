@@ -154,7 +154,7 @@ For this format, the barcode is not included in the content of the fastq file, b
 
 ## Chimera splitting
 
-Chimera splitting refers to an optional step run before demultiplexing, whereby common chimeric reads are split into two or more subreads, which are then processed normally. This was previously done with a standalone "split.sh" script, which has since been merged to the main program as an optional flag `-s` (or its long form `--split-chims`). For split reads, each resulting subread keeps the original read ID, followed by a dash and the subread number (e.g. if read ID `@VH00444:319:AAFV5MHM5:1:1101:18421:23605` is split into two, this will result in two subreads `@VH00444:319:AAFV5MHM5:1:1101:18421:23605_1` and `@VH00444:319:AAFV5MHM5:1:1101:18421:23605-2`).
+Chimera splitting refers to an optional step run before demultiplexing, whereby common chimeric reads are split into two or more subreads, which are then processed normally. This was previously done with a standalone "split.sh" script, which has since been merged to the main program as an optional flag `-s` (or its long form `--split-chims`). For split reads, each resulting subread keeps the original read ID, followed by a dash and the subread number (e.g. if read ID `@VH00444:319:AAFV5MHM5:1:1101:18421:23605` is split into two, this will result in two subreads `@VH00444:319:AAFV5MHM5:1:1101:18421-23605-1` and `@VH00444:319:AAFV5MHM5:1:1101:18421:23605-2`).
 
 # Examples and downstream analysis
 
