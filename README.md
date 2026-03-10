@@ -1,20 +1,14 @@
-# ArgenTag single-cell read demultiplexing pipelines
+# ArgenTag single-cell read demultiplexing pipeline
 
-Demultiplexing refers to the process of identifying the barcode(s) that each sequencing read from a given single-cell sequencing experiment is tagged with. Reads with common barcodes are assigned to the same cell. Currently, there are two alternatives for demultiplexing single-cell data generated on the ArgenTag platform:
-
-+ **Customer-facing pipeline**. For users who want to maintain full control of their analysis or are otherwise unwilling or unable to disclose sequencing data (e.g. due to regulatory requirements), we provide a simplified standalone version of our software which can be run directly by users. This version of the pipeline is briefly described below, and example commands are provided.
-
-+ **In-house single-cell pipeline**. This is the processing pipeline used internally by the ArgenTag team to process internally- and externally-generated data. Typically, users upload their data to ArgenTag's cloud servers, where it is processed by our team to generate demultiplexed read files along with reports and supplementary files. This pipeline is described on a [separate page](doc/in-house.md).
+Demultiplexing refers to the process of identifying the barcode(s) that each sequencing read from a given single-cell sequencing experiment is tagged with. Reads with common barcodes are assigned to the same cell. The customer-facing version of the ArgenTag pipeline is described here. An alternative version, used internally by the ArgenTag team to process internally- and externally-generated data, is described on a [separate page](doc/in-house.md).
 
 In either case, the main output of the pipeline is a set of demultiplexed, trimmed reads. These can be fed to a downstream analysis pipeline, including the [Iso-Seq pipeline](#pacbio-data-and-iso-seq-downstream-analysis-pipeline) (recommended for PacBio reads) and the [FLAMES-based downstream analysis pipeline](#ont-data-and-flames-based-downstream-analysis-pipeline) (recommended for ONT reads). Downstream analysis is covered here only briefly, but users are encouraged to see the provided [examples](#Examples-and-downstream-analysis) and the documentation for their tool of choice for further details.
-
-## Customer-facing demultiplexing pipeline
 
 ![Customer-facing demultiplexing pipeline](doc/img/customer-facing.png)
 
 For the customer-facing pipeline, the entire pipeline (except for an optional [chimera splitting step](#chimera-splitting)) is consolidated into a single binary to make it more user friendly. The input is a file of basecalled reads in sam or fastq format, while the output is a set of demultiplexed, trimmed reads in one of the [supported output formats](#output-formats).
 
-### Usage
+## Usage
     
     Usage: taggy_demux [OPTION...] input-file
     taggy_demux -- a demultiplexer for ArgenTag reads
@@ -59,7 +53,7 @@ For the customer-facing pipeline, the entire pipeline (except for an optional [c
     Mandatory or optional arguments to long options are also mandatory or optional
     for any corresponding short options.
 
-### Presets
+## Presets
 
 For convenience, common combinations of flags are grouped into presets, which can be passed via the `-x` flag (or its long form, `--presets`). The following presets are available:
 
@@ -76,9 +70,9 @@ Sequencing platform:
 
 Multiple presets can be combined via the `+` character (e.g. `--presets=ont+v2`), and individual settings can be overriden by flags appearing *after* the preset (e.g. `--presets=v1+hifi --out-fmt=fastq` will use general settings for PacBio Hi-Fi reads obtained with v1 beads, except the output will be in fastq format rather than sam (which is the default for this preset).
 
-### Output formats
+## Output formats
 
-#### PacBio-style sam format (`--out-fmt=sam`)
+### PacBio-style sam format (`--out-fmt=sam`)
 This format follows the [SAM format specification](http://samtools.github.io/hts-specs/SAMv1.pdf) maintained by the SAM/BAM Format Specification Working Group, making use of the optional tags to encode additional information relevant to barcode demultiplexing and single-cell analysis. Consistency with the [PacBio BAM format specification](https://pacbiofileformats.readthedocs.io/en/13.0/BAM.html) is maintained. In particular, the following tags are added:
 
 | Tag	| Data type	| Description				|
@@ -101,12 +95,12 @@ An example SAM entry (line) is shown below:
 
 <!--
 
-#### PacBio-style bam format (`--out-fmt=bam`)
+### PacBio-style bam format (`--out-fmt=bam`)
 This is the binary version of the above [PacBio-style sam format](#pacbio-style-sam-format---out-fmtsam), and should be equivalent to using `--out-fmt=sam` followed by sam-to-bam conversion with a third-party tool.
 
 -->
 
-#### FLAMES-style fastq format (`--out-fmt=flames`, default)
+### FLAMES-style fastq format (`--out-fmt=flames`, default)
 This is like the standard fastq format, except that read headers follow the following structure:
 
     @XXXX-YYYY-ZZZZ_UUUUUUUUUUUU#READID
@@ -121,7 +115,7 @@ An example could be
 
 which would correspond to sequencing read VH00444:319:AAFV5MHM5:1:1101:18421:23605, which has been tagged with the barcode triplet (0076, 0048, 0089) and the UMI "ATACCGGCTACA".
 
-#### Fastq format with mapped barcode (`--out-fmt=fastq`)
+### Fastq format with mapped barcode (`--out-fmt=fastq`)
 This uses a standard fastq format, except that read headers follow the following structure:
 
     @BBBBBBBBBBBBBBBB_UUUUUUUUUUUU#READID
@@ -136,7 +130,7 @@ An example could be
 
 which would correspond to sequencing read VH00444:319:AAFV5MHM5:1:1101:18421:23605, which has been tagged with the cell barcode "ACGTGCAGCAGACGGT" and the UMI "ATACCGGCTACA".
 
-#### scNanoGPS-style fastq format (`--out-fmt=scnano`)
+### scNanoGPS-style fastq format (`--out-fmt=scnano`)
 This is like the standard fastq format, except that read headers follow the following structure:
 
     @READID_UUUUUUUUUUUU
@@ -152,7 +146,7 @@ which would correspond to sequencing read VH00444:319:AAFV5MHM5:1:1101:18421:236
 
 For this format, the barcode is not included in the content of the fastq file, but is instead provided in the file name (one file per barcode combination/cell).
 
-## Chimera splitting
+# Chimera splitting
 
 Chimera splitting refers to an optional step run before demultiplexing, whereby common chimeric reads are split into two or more subreads, which are then processed normally. This was previously done with a standalone "split.sh" script, which has since been merged to the main program as an optional flag `-s` (or its long form `--split-chims`). For split reads, each resulting subread keeps the original read ID, followed by a dash and the subread number (e.g. if read ID `@VH00444:319:AAFV5MHM5:1:1101:18421:23605` is split into two, this will result in two subreads `@VH00444:319:AAFV5MHM5:1:1101:18421-23605-1` and `@VH00444:319:AAFV5MHM5:1:1101:18421:23605-2`).
 
