@@ -197,7 +197,7 @@ For data generated on the ONT platform, we recommend running the optional [chime
     # Run with 32 threads and optional chimera splitting step (see "Chimera splitting" above)
 	NUM_THREADS=32
     mkdir -p "$OUT_DIR"
-    bin/taggy_demux -T "$NUM_THREADS" --presets=ont "$INPUT_FASTQ_FILE"
+    bin/taggy_demux -T "$NUM_THREADS" -o "$OUT_DIR" --presets=ont "$INPUT_FASTQ_FILE"
     # The above command is equivalent to
     # bin/taggy_demux -T "$NUM_THREADS" -o "$OUT_DIR" --in-fmt=fastq \
     # --out-fmt=flames --max-edit-d=0.15 --orient sense \
