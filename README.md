@@ -10,54 +10,54 @@ For the customer-facing pipeline, the entire pipeline (except for an optional [c
 
 ## Usage
     
-Usage: taggy_demux [OPTION...] input-file
-taggy_demux -- a demultiplexer for ArgenTag reads
-
-  -c, --umi-pre=INT          Use INT as UMI pre context. [2]
-  -C, --umi-post=INT         Use INT as UMI post context. [2]
-  -d, --darwin               Output entity list for plotting with the darwin
-                             analysis tool.
-  -D, --max-edit-d=INT/FLOAT Maximum edit distance to consider for linker
-                             alignment (-1 means no limit). If float and < 1,
-                             intepreted as a relative maximum edit dist. If
-                             float and > 1, rounded down. [3]
-  -f, --in-fmt=STRING        Format for input read file. Valid values are
-                             "fastq", "sam". [fastq]
-  -F, --out-fmt=STRING       Format for output read file. Valid values are
-                             "flames", "fastq", "scnano", "sam". [flames]
-  -h, --keep-header          Preserve SAM header in output. Only meaningful if
-                             --in-fmt=sam and --out-fmt=sam. [FALSE]
-  -k, --keep-failed          Keep failed reads and set nb tag to -1. Only
-                             meaningful if --out-fmt=sam. [FALSE]
-  -o, --output-dir=DIR       Output directory. [Current directory]
-  -O, --orient=STRING        Orientation in which to output reads (one of
-                             "sense", "anti", "preserve" or "invert". [sense]
-  -p, --trim-poly=STRING     Trim polyA/T from output sequences. Valid values
-                             are "none", "strict", "normal", "lenient". [none]
-  -P, --preserve             Preserve tags in original sam record. Only
-                             meaningful if --in-fmt=sam and --out-fmt=sam.
-                             [FALSE]
-  -r, --require-TSO          Require TSO to call a read as valid. [FALSE]
-  -R, --max-r-bases=INT      Maximum number of bases from read to align (-1
-                             means no limit) [-1]
-  -s, --split-chims          Split chimeric reads. [FALSE]
-  -S, --sample=INT           Process only the first INT reads (-1 means no
-                             limit) [-1]
-  -t, --trim-TSO             Trim TSO (if found) from output sequences. [FALSE]
-                            
-  -T, --num-threads=INT      Use INT parallel threads [1]
-  -u, --umi-start=INT        Use INT as UMI start coordinate. [24]
-  -U, --umi-end=INT          Use INT as UMI end coordinate. [39]
-  -w, --whitelist=FILE       Barcode whitelist file. [Default]
-  -x, --presets=STRING       Presets for sequencing technology (hifi, ont,
-                             illu), bead design (v1, v2) and kit type (cell,
-                             nuclei). Can be combined via "+" (e.g.
-                             --presets=ont+v1 or -x hifi+v2+nuclei).
-  -?, --help                 Give this help list
-      --usage                Give a short usage message
-
-Mandatory or optional arguments to long options are also mandatory or optional
-for any corresponding short options.
+    Usage: taggy_demux [OPTION...] input-file
+    taggy_demux -- a demultiplexer for ArgenTag reads
+    
+      -c, --umi-pre=INT          Use INT as UMI pre context. [2]
+      -C, --umi-post=INT         Use INT as UMI post context. [2]
+      -d, --darwin               Output entity list for plotting with the darwin
+                                 analysis tool.
+      -D, --max-edit-d=INT/FLOAT Maximum edit distance to consider for linker
+                                 alignment (-1 means no limit). If float and < 1,
+                                 intepreted as a relative maximum edit dist. If
+                                 float and > 1, rounded down. [3]
+      -f, --in-fmt=STRING        Format for input read file. Valid values are
+                                 "fastq", "sam". [fastq]
+      -F, --out-fmt=STRING       Format for output read file. Valid values are
+                                 "flames", "fastq", "scnano", "sam". [flames]
+      -h, --keep-header          Preserve SAM header in output. Only meaningful if
+                                 --in-fmt=sam and --out-fmt=sam. [FALSE]
+      -k, --keep-failed          Keep failed reads and set nb tag to -1. Only
+                                 meaningful if --out-fmt=sam. [FALSE]
+      -o, --output-dir=DIR       Output directory. [Current directory]
+      -O, --orient=STRING        Orientation in which to output reads (one of
+                                 "sense", "anti", "preserve" or "invert". [sense]
+      -p, --trim-poly=STRING     Trim polyA/T from output sequences. Valid values
+                                 are "none", "strict", "normal", "lenient". [none]
+      -P, --preserve             Preserve tags in original sam record. Only
+                                 meaningful if --in-fmt=sam and --out-fmt=sam.
+                                 [FALSE]
+      -r, --require-TSO          Require TSO to call a read as valid. [FALSE]
+      -R, --max-r-bases=INT      Maximum number of bases from read to align (-1
+                                 means no limit) [-1]
+      -s, --split-chims          Split chimeric reads. [FALSE]
+      -S, --sample=INT           Process only the first INT reads (-1 means no
+                                 limit) [-1]
+      -t, --trim-TSO             Trim TSO (if found) from output sequences. [FALSE]
+                                
+      -T, --num-threads=INT      Use INT parallel threads [1]
+      -u, --umi-start=INT        Use INT as UMI start coordinate. [24]
+      -U, --umi-end=INT          Use INT as UMI end coordinate. [39]
+      -w, --whitelist=FILE       Barcode whitelist file. [Default]
+      -x, --presets=STRING       Presets for sequencing technology (hifi, ont,
+                                 illu), bead design (v1, v2) and kit type (cell,
+                                 nuclei). Can be combined via "+" (e.g.
+                                 --presets=ont+v1 or -x hifi+v2+nuclei).
+      -?, --help                 Give this help list
+          --usage                Give a short usage message
+    
+    Mandatory or optional arguments to long options are also mandatory or optional
+    for any corresponding short options.
 
 ## Presets
 
