@@ -74,7 +74,7 @@ Sequencing platform:
 
     -x hifi / --presets=hifi: equivalent to --in-fmt=sam --out-fmt=sam --max-edit-d=0.1 --orient sense --trim-poly normal --trim-TSO --keep-header --preserve 
     -x ont / --presets=ont: equivalent to --in-fmt=fastq --out-fmt=flames --max-edit-d=0.15 --orient sense --trim-poly lenient --trim-TSO --split-chims
-    -x illu / --presets=illu: equivalent to --in-fmt=fastq --out-fmt=fastq --max-edit-d=0.05 --orient sense --trim-poly strict --trim-TSO
+    -x illu / --presets=illu: equivalent to --in-fmt=paired --out-fmt=paired --max-edit-d=0.05 --orient sense --trim-poly strict --trim-TSO
 
 Multiple presets can be combined via the `+` character (e.g. `--presets=ont+v2`), and individual settings can be overriden by flags appearing *after* the preset (e.g. `--presets=v1+hifi --out-fmt=fastq` will use general settings for PacBio Hi-Fi reads obtained with v1 beads, except the output will be in fastq format rather than sam (which is the default for this preset).
 
