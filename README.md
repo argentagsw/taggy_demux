@@ -9,10 +9,11 @@ In either case, the main output of the pipeline is a set of demultiplexed, trimm
 For the customer-facing pipeline, the entire pipeline (except for an optional [chimera splitting step](#chimera-splitting)) is consolidated into a single binary to make it more user friendly. The input is a file of basecalled reads in sam or fastq format, while the output is a set of demultiplexed, trimmed reads in one of the [supported output formats](#output-formats).
 
 ## Usage
-    
+
     Usage: taggy_demux [OPTION...] input-file
     taggy_demux -- a demultiplexer for ArgenTag reads
     
+      -2, --mate-file=FILE       Read mate reads from FILE.
       -c, --umi-pre=INT          Use INT as UMI pre context. [2]
       -C, --umi-post=INT         Use INT as UMI post context. [2]
       -d, --darwin               Output entity list for plotting with the darwin
@@ -29,6 +30,8 @@ For the customer-facing pipeline, the entire pipeline (except for an optional [c
                                  --in-fmt=sam and --out-fmt=sam. [FALSE]
       -k, --keep-failed          Keep failed reads and set nb tag to -1. Only
                                  meaningful if --out-fmt=sam. [FALSE]
+      -m, --min-len=INT          Minimum length to output. [1]
+      -M, --max-len=INT          Maximum length to output. -1 means no limit. [-1]
       -o, --output-dir=DIR       Output directory. [Current directory]
       -O, --orient=STRING        Orientation in which to output reads (one of
                                  "sense", "anti", "preserve" or "invert". [sense]
@@ -48,11 +51,10 @@ For the customer-facing pipeline, the entire pipeline (except for an optional [c
       -T, --num-threads=INT      Use INT parallel threads [1]
       -u, --umi-start=INT        Use INT as UMI start coordinate. [24]
       -U, --umi-end=INT          Use INT as UMI end coordinate. [39]
-      -w, --whitelist=FILE       Barcode whitelist file. [Default]
+      -w, --whitelist=FILE       Use custom barcode whitelist file.
       -x, --presets=STRING       Presets for sequencing technology (hifi, ont,
-                                 illu), bead design (v1, v2) and kit type (cell,
-                                 nuclei). Can be combined via "+" (e.g.
-                                 --presets=ont+v1 or -x hifi+v2+nuclei).
+                                 illu)and bead design (v1, v2). Can be combined via
+                                 "+" (e.g. --presets=ont+v1).
       -?, --help                 Give this help list
           --usage                Give a short usage message
     
