@@ -53,8 +53,9 @@ For the customer-facing pipeline, the entire pipeline (except for an optional [c
       -U, --umi-end=INT          Use INT as UMI end coordinate. [39]
       -w, --whitelist=FILE       Use custom barcode whitelist file.
       -x, --presets=STRING       Presets for sequencing technology (hifi, ont,
-                                 illu)and bead design (v1, v2). Can be combined via
-                                 "+" (e.g. --presets=ont+v1).
+                                 illu), bead design (v1, v2) and kit type (cell,
+                                 nuclei). Can be combined via "+" (e.g.
+                                 --presets=ont+v1 or -x hifi+v2+nuclei).
       -?, --help                 Give this help list
           --usage                Give a short usage message
     
